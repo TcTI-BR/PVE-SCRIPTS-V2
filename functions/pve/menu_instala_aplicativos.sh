@@ -20,7 +20,7 @@ instala_aplicativos_menu(){
 	echo -e "${COLOR_WHITE}Selecione o aplicativo que deseja instalar:${COLOR_RESET}"
 	echo ""
 	echo -e "${MENU}**${NUMBER} 1)${MENU} TacticalRMM - Remote Monitoring & Management ${NORMAL}"
-	echo -e "${COLOR_GRAY}       Agente de monitoramento remoto (Netvolt)${NORMAL}"
+	echo -e "${COLOR_GRAY}       Agente de monitoramento remoto  ${NORMAL}"
 	echo ""
 	echo -e "${MENU}**${NUMBER} 2)${MENU} ${COLOR_GRAY}Zabbix Agent (Em breve)${NORMAL}"
 	echo -e "${COLOR_GRAY}       Sistema de monitoramento de infraestrutura${NORMAL}"
