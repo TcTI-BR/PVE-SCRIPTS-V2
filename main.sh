@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Script modular para Proxmox VE e PBS
-# Versão: V002.R001
+# Versão: V003.R001
 # Por: Marcelo Machado
 
-version=V002.R001
+version=V003.R001
 
 # Define o diretório base do script, independentemente de onde é chamado
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
