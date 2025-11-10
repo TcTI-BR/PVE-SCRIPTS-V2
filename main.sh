@@ -9,8 +9,8 @@ version=V002.R001
 # Define o diretório base do script, independentemente de onde é chamado
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-# Remove script antigo da inicialização
-rm /etc/profile.d/proxmox-ini.sh
+# Remove script antigo da inicialização (versão anterior)
+rm -f /etc/profile.d/proxmox-ini.sh 2>/dev/null
 
 # Variáveis de Repositório
 BASE_URL="https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main"

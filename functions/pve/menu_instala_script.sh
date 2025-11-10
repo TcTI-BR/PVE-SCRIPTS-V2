@@ -28,10 +28,10 @@ instala_script(){
 	case $opt in
 		1) clear;
 		# Cria script para executar main.sh ao carregar o shell
-		echo "#!/bin/bash" > /etc/profile.d/proxmox-ini.sh
-		echo "cd $SCRIPT_DIR" >> /etc/profile.d/proxmox-ini.sh
-		echo "./main.sh" >> /etc/profile.d/proxmox-ini.sh
-		chmod +x /etc/profile.d/proxmox-ini.sh
+		echo "#!/bin/bash" > /etc/profile.d/tcti-proxmox-auto.sh
+		echo "cd $SCRIPT_DIR" >> /etc/profile.d/tcti-proxmox-auto.sh
+		echo "./main.sh" >> /etc/profile.d/tcti-proxmox-auto.sh
+		chmod +x /etc/profile.d/tcti-proxmox-auto.sh
 		echo "Script instalado! O main.sh será executado automaticamente ao abrir o shell."
 		read -p "Pressione uma tecla para continuar..."
 		clear	  
@@ -39,7 +39,7 @@ instala_script(){
 			;;
 		2) clear;
 		# Remove o script de inicialização
-		rm -f /etc/profile.d/proxmox-ini.sh
+		rm -f /etc/profile.d/tcti-proxmox-auto.sh
 		echo "Script removido! O main.sh não será mais executado automaticamente."
 		read -p "Pressione uma tecla para continuar..."
 		clear	  
