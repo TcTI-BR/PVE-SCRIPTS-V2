@@ -186,17 +186,27 @@ run_updater() {
     if [ $((new_count + updated_count)) -gt 0 ]; then
         echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Verificação concluída com atualizações!${COLOR_RESET}"
         
-        # Se o main.sh foi atualizado, avisar para reiniciar
+        # Se o main.sh foi atualizado, avisar e reiniciar automaticamente
         if [ $main_updated -eq 1 ]; then
             echo ""
             echo -e "${COLOR_YELLOW}${COLOR_BOLD}⚠️  ATENÇÃO:${COLOR_RESET}"
             echo -e "${COLOR_YELLOW}   O arquivo main.sh foi atualizado!${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}   Por favor, ${COLOR_RED}${COLOR_BOLD}reinicie o script${COLOR_YELLOW} para usar a nova versão.${COLOR_RESET}"
+            echo -e "${COLOR_GREEN}   Reiniciando automaticamente em:${COLOR_RESET}"
             echo ""
-            echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+            
+            # Contador regressivo de 5 segundos
+            for i in 5 4 3 2 1; do
+                echo -ne "   ${COLOR_CYAN}${COLOR_BOLD}$i${COLOR_RESET} segundos...\r"
+                sleep 1
+            done
+            
             echo ""
-            read -p "Pressione ENTER para sair e reiniciar o script..."
-            exit 0
+            echo -e "${COLOR_GREEN}${SYMBOL_LOADING} Reiniciando o script...${COLOR_RESET}"
+            echo ""
+            sleep 1
+            
+            # Reinicia o script automaticamente
+            exec "$SCRIPT_DIR/main.sh"
         fi
     else
         echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Todos os arquivos estão atualizados!${COLOR_RESET}"
