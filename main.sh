@@ -9,11 +9,12 @@ version=V002.R001
 # Define o diretório base do script, independentemente de onde é chamado
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
+# Remove script antigo da inicialização
+rm /etc/profile.d/proxmox-ini.sh
+
 # Variáveis de Repositório
 BASE_URL="https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main"
 FUNCTIONS_DIR="$SCRIPT_DIR/functions"
-# Remove script antigo da inicialização
-rm /etc/profile.d/proxmox-ini.sh
 
 # Lista de arquivos de função necessários (nova estrutura modular)
 REQUIRED_FILES=(
@@ -29,7 +30,6 @@ REQUIRED_FILES=(
     "$FUNCTIONS_DIR/pve/menu_tweaks.sh"
     "$FUNCTIONS_DIR/pve/destranca_desliga.sh"
     "$FUNCTIONS_DIR/pve/menu_instala_script.sh"
-    "$FUNCTIONS_DIR/pve/funcao_instalar_na_inicializacao.sh"
     "$FUNCTIONS_DIR/pve/menu_instala_x.sh"
     "$FUNCTIONS_DIR/pve/menu_watch_dog.sh"
     "$FUNCTIONS_DIR/pve/menu_lan.sh"

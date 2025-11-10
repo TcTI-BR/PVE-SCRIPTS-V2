@@ -13,8 +13,8 @@ instala_script(){
     echo -e "${MENU}********* Script ($version) para Proxmox Virtual Environment *********${NORMAL}"
     echo -e "${MENU}********************** Por Marcelo Machado ****************************${NORMAL}"
 	echo " "
-	echo -e "${MENU}**${NUMBER} 1)${MENU} Instala verificação de scripts na inicialização ${NORMAL}"
-	echo -e "${MENU}**${NUMBER} 2)${MENU} Desinstala verificação de scripts na inicialização ${NORMAL}"
+	echo -e "${MENU}**${NUMBER} 1)${MENU} Instala o script ao carregar o usuário ${NORMAL}"
+	echo -e "${MENU}**${NUMBER} 2)${MENU} Desinstala o script ao carregar o usuario ${NORMAL}"
 	echo -e "${MENU}**${NUMBER} 0)${MENU} Voltar ${NORMAL}"
 	echo " "
 	echo -e "${MENU}***********************************************************************${NORMAL}"
@@ -27,12 +27,20 @@ instala_script(){
 		else
 	case $opt in
 		1) clear;
-		funcao_instalar_na_inicializacao
+		# Cria script para executar main.sh ao carregar o shell
+		echo "#!/bin/bash" > /etc/profile.d/proxmox-ini.sh
+		echo "cd $SCRIPT_DIR" >> /etc/profile.d/proxmox-ini.sh
+		echo "./main.sh" >> /etc/profile.d/proxmox-ini.sh
+		chmod +x /etc/profile.d/proxmox-ini.sh
+		echo "Script instalado! O main.sh será executado automaticamente ao abrir o shell."
+		read -p "Pressione uma tecla para continuar..."
+		clear	  
+		instala_script
 			;;
 		2) clear;
-		# Remove qualquer cron job do script
-		(crontab -l 2>/dev/null | grep -v "$SCRIPT_DIR/main.sh update" | crontab -)
-		echo "Verificação de scripts na inicialização removida!"
+		# Remove o script de inicialização
+		rm -f /etc/profile.d/proxmox-ini.sh
+		echo "Script removido! O main.sh não será mais executado automaticamente."
 		read -p "Pressione uma tecla para continuar..."
 		clear	  
 		instala_script

@@ -96,21 +96,20 @@ tweaks_pbs_menu(){
   tweaks_pbs_menu	
 	;;
 	4)	clear;
-	echo cd\ > /etc/profile.d/proxmox-ini.sh
-	echo cd /TcTI/SCRIPTS >> /etc/profile.d/proxmox-ini.sh
-	echo rm proxmox-conf.sh	>> /etc/profile.d/proxmox-ini.sh
-	echo wget https://raw.githubusercontent.com/TcTI-BR/PROXMOX-SCRIPTS/main/proxmox-conf.sh >> /etc/profile.d/proxmox-ini.sh
-	echo chmod +x proxmox-conf.sh	>> /etc/profile.d/proxmox-ini.sh
-	echo ./proxmox-conf.sh	>> /etc/profile.d/proxmox-ini.sh
+	# Cria script para executar main.sh ao carregar o shell
+	echo "#!/bin/bash" > /etc/profile.d/proxmox-ini.sh
+	echo "cd $SCRIPT_DIR" >> /etc/profile.d/proxmox-ini.sh
+	echo "./main.sh" >> /etc/profile.d/proxmox-ini.sh
 	chmod +x /etc/profile.d/proxmox-ini.sh
-	echo "Script instalado!"		
+	echo "Script instalado! O main.sh será executado automaticamente ao abrir o shell."
 	read -p "Pressione uma tecla para continuar..."
 	clear	  
   tweaks_pbs_menu
 	;;
-	7)	clear;
-	rm /etc/profile.d/proxmox-ini.sh
-	echo "Script removido!"
+	5)	clear;
+	# Remove o script de inicialização
+	rm -f /etc/profile.d/proxmox-ini.sh
+	echo "Script removido! O main.sh não será mais executado automaticamente."
 	read -p "Pressione uma tecla para continuar..."
 	clear	  
   tweaks_pbs_menu
