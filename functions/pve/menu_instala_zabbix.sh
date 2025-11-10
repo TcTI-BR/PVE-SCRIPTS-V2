@@ -41,73 +41,39 @@ zabbix_check_service() {
     fi
 }
 
-# Função para obter o nome do pacote de release do Zabbix
+# Função para obter o nome do pacote e URL de release do Zabbix
 zabbix_get_repo_package_name() {
     local zabbix_ver="$1"
-    local os_id="$2"
     local os_codename="$3"
     local pkg_name=""
+    local debian_ver=""
     
+    # Mapeia codename para número do Debian
+    case "$os_codename" in
+        trixie) debian_ver="13";;      # Proxmox 9
+        bookworm) debian_ver="12";;    # Proxmox 8
+        bullseye) debian_ver="11";;    # Proxmox 7
+        buster) debian_ver="10";;      # Proxmox 6
+        stretch) debian_ver="9";;      # Proxmox 5
+        *) return 1;;
+    esac
+    
+    # Estrutura: zabbix-release_latest_X.X+debianYY_all.deb
     case "$zabbix_ver" in
+        "8.0")
+            pkg_name="zabbix-release_latest_8.0+debian${debian_ver}_all.deb"
+            ;;
+        "7.4")
+            pkg_name="zabbix-release_latest_7.4+debian${debian_ver}_all.deb"
+            ;;
         "7.2")
-            case "$os_id" in
-                ubuntu)
-                    case "$os_codename" in
-                        noble) pkg_name="zabbix-release_7.2-1+ubuntu24.04_all.deb";;  # Ubuntu 24.04
-                        jammy) pkg_name="zabbix-release_7.2-1+ubuntu22.04_all.deb";;  # Ubuntu 22.04
-                        focal) pkg_name="zabbix-release_7.2-1+ubuntu20.04_all.deb";;  # Ubuntu 20.04
-                        *) return 1;;
-                    esac
-                    ;;
-                debian)
-                    case "$os_codename" in
-                        trixie) pkg_name="zabbix-release_7.2-1+debian13_all.deb";;    # Debian 13 (Proxmox 9)
-                        bookworm) pkg_name="zabbix-release_7.2-1+debian12_all.deb";;  # Debian 12
-                        bullseye) pkg_name="zabbix-release_7.2-1+debian11_all.deb";;  # Debian 11
-                        *) return 1;;
-                    esac
-                    ;;
-                *) return 1;;
-            esac
+            pkg_name="zabbix-release_latest_7.2+debian${debian_ver}_all.deb"
             ;;
         "7.0")
-            case "$os_id" in
-                ubuntu)
-                    case "$os_codename" in
-                        noble) pkg_name="zabbix-release_7.0-2+ubuntu24.04_all.deb";;
-                        jammy) pkg_name="zabbix-release_7.0-2+ubuntu22.04_all.deb";;
-                        focal) pkg_name="zabbix-release_7.0-2+ubuntu20.04_all.deb";;
-                        *) return 1;;
-                    esac
-                    ;;
-                debian)
-                    case "$os_codename" in
-                        bookworm) pkg_name="zabbix-release_7.0-2+debian12_all.deb";;
-                        bullseye) pkg_name="zabbix-release_7.0-2+debian11_all.deb";;
-                        *) return 1;;
-                    esac
-                    ;;
-                *) return 1;;
-            esac
+            pkg_name="zabbix-release_latest_7.0+debian${debian_ver}_all.deb"
             ;;
-        "6.4")
-            case "$os_id" in
-                ubuntu)
-                    case "$os_codename" in
-                        jammy) pkg_name="zabbix-release_6.4-1+ubuntu22.04_all.deb";;
-                        focal) pkg_name="zabbix-release_6.4-1+ubuntu20.04_all.deb";;
-                        *) return 1;;
-                    esac
-                    ;;
-                debian)
-                    case "$os_codename" in
-                        bookworm) pkg_name="zabbix-release_6.4-1+debian12_all.deb";;
-                        bullseye) pkg_name="zabbix-release_6.4-1+debian11_all.deb";;
-                        *) return 1;;
-                    esac
-                    ;;
-                *) return 1;;
-            esac
+        "6.0")
+            pkg_name="zabbix-release_latest_6.0+debian${debian_ver}_all.deb"
             ;;
         *)
             return 1
@@ -115,6 +81,24 @@ zabbix_get_repo_package_name() {
     esac
     
     echo "$pkg_name"
+    return 0
+}
+
+# Função para obter a URL base do repositório (algumas usam /release/, outras não)
+zabbix_get_repo_base_url() {
+    local zabbix_ver="$1"
+    
+    case "$zabbix_ver" in
+        "8.0"|"7.4"|"7.2")
+            echo "https://repo.zabbix.com/zabbix/${zabbix_ver}/release/debian/pool/main/z/zabbix-release"
+            ;;
+        "7.0"|"6.0")
+            echo "https://repo.zabbix.com/zabbix/${zabbix_ver}/debian/pool/main/z/zabbix-release"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
     return 0
 }
 
@@ -146,17 +130,21 @@ zabbix_install() {
     # Seleciona versão do Zabbix
     echo -e "${COLOR_BOLD}Selecione a versão do Zabbix Agent:${COLOR_RESET}"
     echo ""
-    echo -e "  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.2 LTS${COLOR_RESET} ${COLOR_GRAY}(Recomendado para Proxmox 9)${COLOR_RESET}"
-    echo -e "  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.0 LTS${COLOR_RESET}"
-    echo -e "  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}6.4 Standard${COLOR_RESET}"
+    echo -e "  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}8.0 Latest${COLOR_RESET} ${COLOR_GRAY}(Mais recente)${COLOR_RESET}"
+    echo -e "  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.4 LTS${COLOR_RESET}"
+    echo -e "  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.2 LTS${COLOR_RESET}"
+    echo -e "  ${COLOR_YELLOW}4${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.0 LTS${COLOR_RESET}"
+    echo -e "  ${COLOR_YELLOW}5${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}6.0 LTS${COLOR_RESET}"
     echo -e "  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Cancelar${COLOR_RESET}"
     echo ""
     read -p "→ " version_choice
     
     case "$version_choice" in
-        1) ZABBIX_VERSION="7.2";;
-        2) ZABBIX_VERSION="7.0";;
-        3) ZABBIX_VERSION="6.4";;
+        1) ZABBIX_VERSION="8.0";;
+        2) ZABBIX_VERSION="7.4";;
+        3) ZABBIX_VERSION="7.2";;
+        4) ZABBIX_VERSION="7.0";;
+        5) ZABBIX_VERSION="6.0";;
         0|"") 
             echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Instalação cancelada.${COLOR_RESET}"
             sleep 2
@@ -171,11 +159,12 @@ zabbix_install() {
             ;;
     esac
     
-    # Obtém nome do pacote
+    # Obtém nome do pacote e URL base
     REPO_PKG_NAME=$(zabbix_get_repo_package_name "$ZABBIX_VERSION" "$OS_ID" "$OS_CODENAME")
     if [ $? -ne 0 ] || [ -z "$REPO_PKG_NAME" ]; then
         echo ""
         echo -e "${COLOR_RED}${SYMBOL_ERROR} Sistema operacional não suportado para Zabbix $ZABBIX_VERSION${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}Sistema: $OS_ID $OS_VERSION_ID ($OS_CODENAME)${COLOR_RESET}"
         echo -e "${COLOR_YELLOW}Consulte: https://www.zabbix.com/download${COLOR_RESET}"
         echo ""
         read -p "Pressione ENTER para continuar..."
@@ -183,7 +172,17 @@ zabbix_install() {
         return
     fi
     
-    REPO_URL="https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/${OS_ID}/pool/main/z/zabbix-release/${REPO_PKG_NAME}"
+    REPO_BASE_URL=$(zabbix_get_repo_base_url "$ZABBIX_VERSION")
+    if [ $? -ne 0 ] || [ -z "$REPO_BASE_URL" ]; then
+        echo ""
+        echo -e "${COLOR_RED}${SYMBOL_ERROR} Erro ao determinar URL do repositório${COLOR_RESET}"
+        echo ""
+        read -p "Pressione ENTER para continuar..."
+        instala_zabbix_menu
+        return
+    fi
+    
+    REPO_URL="${REPO_BASE_URL}/${REPO_PKG_NAME}"
     
     clear
     echo -e "${COLOR_CYAN}${COLOR_BOLD}"
@@ -217,11 +216,27 @@ zabbix_install() {
     # Confirmação
     echo ""
     echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    # Determina label da versão
+    local VERSION_LABEL="$ZABBIX_VERSION"
+    case "$ZABBIX_VERSION" in
+        "8.0") VERSION_LABEL="$ZABBIX_VERSION Latest";;
+        "7.4"|"7.2"|"7.0"|"6.0") VERSION_LABEL="$ZABBIX_VERSION LTS";;
+    esac
+    
+    # Determina nome amigável do Proxmox
+    local PROXMOX_NAME=""
+    case "$OS_CODENAME" in
+        trixie) PROXMOX_NAME=" / Proxmox VE 9";;
+        bookworm) PROXMOX_NAME=" / Proxmox VE 8";;
+        bullseye) PROXMOX_NAME=" / Proxmox VE 7";;
+        buster) PROXMOX_NAME=" / Proxmox VE 6";;
+    esac
+    
     echo -e "${COLOR_MAGENTA}${COLOR_BOLD}📋 Resumo da Instalação:${COLOR_RESET}"
     echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
     echo ""
-    echo -e "  ${COLOR_YELLOW}Versão:${COLOR_RESET}         Zabbix Agent ${COLOR_WHITE}$ZABBIX_VERSION LTS${COLOR_RESET}"
-    echo -e "  ${COLOR_YELLOW}Sistema:${COLOR_RESET}        ${COLOR_WHITE}$OS_ID $OS_VERSION_ID ($OS_CODENAME)${COLOR_RESET}"
+    echo -e "  ${COLOR_YELLOW}Versão:${COLOR_RESET}         Zabbix Agent ${COLOR_WHITE}$VERSION_LABEL${COLOR_RESET}"
+    echo -e "  ${COLOR_YELLOW}Sistema:${COLOR_RESET}        ${COLOR_WHITE}Debian $OS_VERSION_ID ($OS_CODENAME)${PROXMOX_NAME}${COLOR_RESET}"
     echo -e "  ${COLOR_YELLOW}Server:${COLOR_RESET}         ${COLOR_WHITE}$ZABBIX_SERVER_IP${COLOR_RESET}"
     echo -e "  ${COLOR_YELLOW}Hostname:${COLOR_RESET}       ${COLOR_WHITE}$ZABBIX_AGENT_HOSTNAME${COLOR_RESET}"
     echo ""
@@ -244,9 +259,10 @@ zabbix_install() {
     echo ""
     
     # Baixa pacote de release
-    echo -e "${COLOR_BLUE}${SYMBOL_INFO} Baixando repositório Zabbix...${COLOR_RESET}"
+    echo -e "${COLOR_BLUE}${SYMBOL_INFO} Baixando repositório Zabbix $ZABBIX_VERSION...${COLOR_RESET}"
     if ! wget -q "$REPO_URL" -O /tmp/"$REPO_PKG_NAME" 2>/dev/null; then
         echo -e "${COLOR_RED}${SYMBOL_ERROR} Erro ao baixar repositório!${COLOR_RESET}"
+        echo -e "${COLOR_GRAY}URL: $REPO_URL${COLOR_RESET}"
         echo ""
         read -p "Pressione ENTER para continuar..."
         instala_zabbix_menu
