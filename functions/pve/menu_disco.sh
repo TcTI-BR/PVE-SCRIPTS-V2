@@ -5,23 +5,35 @@
 disco_menu(){
 	clear
 	NORMAL=`echo "\033[m"`
-    MENU=`echo "\033[36m"` #Azul
-    NUMBER=`echo "\033[33m"` #Amarelo
-    FGRED=`echo "\033[41m"`
-    RED_TEXT=`echo "\033[31m"`
-    ENTER_LINE=`echo "\033[33m"`
-    echo -e "${MENU}********* Script ($version) para Proxmox Virtual Environment *********${NORMAL}"
-    echo -e "${MENU}********************** Por Marcelo Machado ****************************${NORMAL}"
-	echo " "
-	echo -e "${MENU}**${NUMBER} 1)${MENU} Configura discos ${NORMAL}"
-	echo -e "${MENU}**${NUMBER} 2)${MENU} Teste de velocidade dos discos ${NORMAL}"
-	echo -e "${MENU}**${NUMBER} 3)${MENU} Verifica setores defeituosos em discos ${NORMAL}"
-	echo -e "${MENU}**${NUMBER} 4)${MENU} Verifica o SMART do disco ${NORMAL}"
-	echo -e "${MENU}**${NUMBER} 5)${MENU} Remove o storage local-lvm ${NORMAL}"
-	echo -e "${MENU}**${NUMBER} 0)${MENU} Voltar ${NORMAL}"
-	echo " "
-	echo -e "${MENU}***********************************************************************${NORMAL}"
-	echo -e "${ENTER_LINE}Digite um numero dentre as opções acima ou pressione ${RED_TEXT}ENTER ${ENTER_LINE}para sair.${NORMAL} "
+	MENU=`echo "\033[36m"`
+	NUMBER=`echo "\033[33m"`
+	FGRED=`echo "\033[41m"`
+	RED_TEXT=`echo "\033[31m"`
+	ENTER_LINE=`echo "\033[33m"`
+	
+	echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+	echo -e "╔═════════════════════════════════════════════════════════════════════╗"
+	echo -e "║                                                                     ║"
+	echo -e "║                    💾 Ferramentas de Disco                          ║"
+	echo -e "║                                                                     ║"
+	echo -e "╚═════════════════════════════════════════════════════════════════════╝"
+	echo -e "${COLOR_RESET}"
+	echo ""
+	echo -e "${COLOR_BOLD}  Selecione uma opção:${COLOR_RESET}"
+	echo ""
+	echo -e "  ${COLOR_CYAN}┌───────────────────────────────────────────────────────────────┐${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Configura discos${COLOR_RESET}                                  ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Teste de velocidade dos discos${COLOR_RESET}                    ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Verifica setores defeituosos em discos${COLOR_RESET}            ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}4${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Verifica o SMART do disco${COLOR_RESET}                         ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}5${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Remove o storage local-lvm${COLOR_RESET}                        ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                              ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}└───────────────────────────────────────────────────────────────┘${COLOR_RESET}"
+	echo ""
+	echo -e "${COLOR_YELLOW}  Digite sua opção ${COLOR_GRAY}(ou pressione ENTER para sair)${COLOR_YELLOW}: ${COLOR_RESET}"
 	read -rsn1 opt
 		while [ opt != '' ]	
 	do
