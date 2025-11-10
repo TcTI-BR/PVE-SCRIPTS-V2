@@ -201,7 +201,7 @@ instala_tactical_rmm_menu() {
     while [ opt != '' ]
     do
         if [[ $opt = "" ]]; then
-            update_menu
+            instala_aplicativos_menu
         else
             case $opt in
                 1) clear;
@@ -211,10 +211,10 @@ instala_tactical_rmm_menu() {
                    trmm_desinstalar_agente
                    ;;
                 0) clear;
-                   update_menu
+                   instala_aplicativos_menu
                    ;;
                 *) clear;
-                   update_menu
+                   instala_aplicativos_menu
                    ;;
             esac
         fi

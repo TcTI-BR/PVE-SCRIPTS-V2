@@ -49,7 +49,7 @@ update_menu(){
 		update_menu;	
 			;;
 		3) clear;
-		instala_tactical_rmm_menu
+		instala_aplicativos_menu
 			;;
 		0) clear;
 		pve_menu;
