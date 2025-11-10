@@ -102,19 +102,22 @@ cloudflared_configure_service() {
     echo -e "${COLOR_YELLOW}${SYMBOL_LOADING} Configurando serviço...${COLOR_RESET}"
     echo ""
     
-    # Para o serviço se estiver rodando
+    # Para e desinstala o serviço se estiver configurado
     if cloudflared_check_service; then
         echo -e "${COLOR_BLUE}${SYMBOL_INFO} Parando serviço existente...${COLOR_RESET}"
         systemctl stop cloudflared 2>/dev/null
-        systemctl disable cloudflared 2>/dev/null
+        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Desinstalando serviço anterior...${COLOR_RESET}"
+        cloudflared service uninstall >/dev/null 2>&1
     fi
     
-    # Remove configuração antiga do serviço
+    # Remove configuração antiga do serviço (garantia)
     if [ -f /etc/systemd/system/cloudflared.service ]; then
-        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Removendo configuração anterior...${COLOR_RESET}"
+        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Limpando configuração anterior...${COLOR_RESET}"
         rm -f /etc/systemd/system/cloudflared.service
-        systemctl daemon-reload 2>/dev/null
     fi
+    
+    # Recarrega o systemd
+    systemctl daemon-reload 2>/dev/null
     
     # Instala o serviço com a nova chave
     echo -e "${COLOR_BLUE}${SYMBOL_INFO} Instalando nova configuração...${COLOR_RESET}"
@@ -174,16 +177,19 @@ cloudflared_remove() {
         echo -e "${COLOR_YELLOW}${SYMBOL_LOADING} Removendo Cloudflared...${COLOR_RESET}"
         echo ""
         
-        # Para e desabilita o serviço se estiver rodando
+        # Para e desinstala o serviço se estiver configurado
         if cloudflared_check_service; then
             echo -e "${COLOR_BLUE}${SYMBOL_INFO} Parando serviço...${COLOR_RESET}"
             systemctl stop cloudflared 2>/dev/null
-            systemctl disable cloudflared 2>/dev/null
+            echo -e "${COLOR_BLUE}${SYMBOL_INFO} Desinstalando serviço...${COLOR_RESET}"
+            cloudflared service uninstall >/dev/null 2>&1
         fi
         
-        # Remove o arquivo de serviço systemd
-        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Removendo configuração do serviço...${COLOR_RESET}"
+        # Remove o arquivo de serviço systemd (garantia)
+        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Limpando configuração do serviço...${COLOR_RESET}"
         rm -f /etc/systemd/system/cloudflared.service
+        
+        # Recarrega o systemd
         systemctl daemon-reload 2>/dev/null
         
         # Remove o pacote
