@@ -390,7 +390,7 @@ instala_zabbix_menu() {
     echo -e "${COLOR_CYAN}${COLOR_BOLD}"
     echo -e "╔═════════════════════════════════════════════════════════════════════╗"
     echo -e "║                                                                     ║"
-    echo -e "║                 📊 Gerenciador Zabbix Agent                         ║"
+    echo -e "║                 📊 Gerenciador Zabbix Agent                          ║"
     echo -e "║                                                                     ║"
     echo -e "╚═════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
