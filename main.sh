@@ -16,8 +16,10 @@ rm -f /etc/profile.d/proxmox-ini.sh 2>/dev/null
 BASE_URL="https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main"
 FUNCTIONS_DIR="$SCRIPT_DIR/functions"
 
-# Lista de arquivos de função necessários (nova estrutura modular)
+# Lista de arquivos necessários (nova estrutura modular)
 REQUIRED_FILES=(
+    # Script Principal
+    "$SCRIPT_DIR/main.sh"
     # Funções PVE
     "$FUNCTIONS_DIR/pve/menu_pve.sh"
     "$FUNCTIONS_DIR/pve/menu_update.sh"
@@ -83,13 +85,14 @@ run_updater() {
     local updated_count=0
     local ok_count=0
     local error_count=0
+    local main_updated=0
     
     echo -e "${COLOR_BLUE}${SYMBOL_LOADING} Verificando ${total_files} arquivos...${COLOR_RESET}\n"
     
     for FILE_PATH in "${REQUIRED_FILES[@]}"; do
         current=$((current + 1))
         
-        # Extrai o caminho relativo (ex: functions/pve/arquivo.sh)
+        # Extrai o caminho relativo (ex: functions/pve/arquivo.sh ou main.sh)
         RELATIVE_PATH="${FILE_PATH#"$SCRIPT_DIR/"}"
         REMOTE_URL="$BASE_URL/$RELATIVE_PATH"
         TMP_FILE="/tmp/$(basename "$FILE_PATH").remote"
@@ -112,10 +115,19 @@ run_updater() {
             echo -e "${COLOR_MAGENTA}${SYMBOL_NEW} NOVO${COLOR_RESET}"
             new_count=$((new_count + 1))
         elif ! diff -q "$FILE_PATH" "$TMP_FILE" >/dev/null 2>&1; then
-            mv "$TMP_FILE" "$FILE_PATH"
-            chmod +x "$FILE_PATH"
-            echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} ATUALIZADO${COLOR_RESET}"
-            updated_count=$((updated_count + 1))
+            # Se for o main.sh, precisamos tratamento especial
+            if [[ "$FILE_NAME" == "main.sh" ]]; then
+                mv "$TMP_FILE" "$FILE_PATH"
+                chmod +x "$FILE_PATH"
+                echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} ATUALIZADO ${COLOR_MAGENTA}(reinicie o script)${COLOR_RESET}"
+                updated_count=$((updated_count + 1))
+                main_updated=1
+            else
+                mv "$TMP_FILE" "$FILE_PATH"
+                chmod +x "$FILE_PATH"
+                echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} ATUALIZADO${COLOR_RESET}"
+                updated_count=$((updated_count + 1))
+            fi
         else
             rm "$TMP_FILE"
             echo -e "${COLOR_GREEN}${SYMBOL_CHECK} OK${COLOR_RESET}"
@@ -148,6 +160,19 @@ run_updater() {
     
     if [ $((new_count + updated_count)) -gt 0 ]; then
         echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Verificação concluída com atualizações!${COLOR_RESET}"
+        
+        # Se o main.sh foi atualizado, avisar para reiniciar
+        if [ $main_updated -eq 1 ]; then
+            echo ""
+            echo -e "${COLOR_YELLOW}${COLOR_BOLD}⚠️  ATENÇÃO:${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}   O arquivo main.sh foi atualizado!${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}   Por favor, ${COLOR_RED}${COLOR_BOLD}reinicie o script${COLOR_YELLOW} para usar a nova versão.${COLOR_RESET}"
+            echo ""
+            echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+            echo ""
+            read -p "Pressione ENTER para sair e reiniciar o script..."
+            exit 0
+        fi
     else
         echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Todos os arquivos estão atualizados!${COLOR_RESET}"
     fi
