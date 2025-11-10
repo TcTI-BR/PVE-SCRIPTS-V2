@@ -39,6 +39,7 @@ REQUIRED_FILES=(
     "$FUNCTIONS_DIR/pve/menu_watch_dog.sh"
     "$FUNCTIONS_DIR/pve/menu_lan.sh"
     "$FUNCTIONS_DIR/pve/menu_commands.sh"
+    "$FUNCTIONS_DIR/pve/menu_instala_tactical_rmm.sh"
     # Funções PBS
     "$FUNCTIONS_DIR/pbs/menu_pbs.sh"
     "$FUNCTIONS_DIR/pbs/menu_update_pbs.sh"

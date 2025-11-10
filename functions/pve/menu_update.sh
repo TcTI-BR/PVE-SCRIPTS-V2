@@ -15,6 +15,7 @@ update_menu(){
 	echo " "
 	echo -e "${MENU}**${NUMBER} 1)${MENU} Upgrade de versões ${NORMAL}"
 	echo -e "${MENU}**${NUMBER} 2)${MENU} Atualização do sistema e instalação de aplicativos mais utilizados ${NORMAL}"
+	echo -e "${MENU}**${NUMBER} 3)${MENU} Instala aplicativos ${NORMAL}"
 	echo -e "${MENU}**${NUMBER} 0)${MENU} Voltar ${NORMAL}"
 	echo " "
 	echo -e "${MENU}***********************************************************************${NORMAL}"
@@ -46,6 +47,9 @@ update_menu(){
 		read -p "Pressione uma tecla para continuar..."
 		clear 
 		update_menu;	
+			;;
+		3) clear;
+		instala_tactical_rmm_menu
 			;;
 		0) clear;
 		pve_menu;
