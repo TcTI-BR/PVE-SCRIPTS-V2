@@ -72,7 +72,7 @@ trmm_instalar_agente() {
     echo ""
     
     # Solicita parâmetros
-    echo -e "${COLOR_WHITE}1.${COLOR_RESET} Insira a URL do ${COLOR_CYAN}Mesh agent${COLOR_RESET} (com aspas simples):"
+    echo -e "${COLOR_WHITE}1.${COLOR_RESET} Insira a URL do ${COLOR_CYAN}Mesh agent${COLOR_RESET}:"
     read -p "   → " MESH_URL
     
     echo -e "${COLOR_WHITE}2.${COLOR_RESET} Insira a ${COLOR_CYAN}API URL${COLOR_RESET} (ex: https://api.example.com):"
