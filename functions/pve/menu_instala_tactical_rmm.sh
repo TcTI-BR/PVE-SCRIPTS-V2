@@ -9,6 +9,24 @@ SCRIPT_URL="https://raw.githubusercontent.com/netvolt/LinuxRMM-Script/main/rmmag
 SCRIPT_NAME="rmmagent-linux.sh"
 SCRIPT_PATH="$INSTALL_DIR/$SCRIPT_NAME"
 
+# Função para verificar se TacticalRMM está instalado
+trmm_check_installed() {
+    if systemctl status tacticalagent &> /dev/null; then
+        return 0  # Instalado
+    else
+        return 1  # Não instalado
+    fi
+}
+
+# Função para verificar se o serviço está ativo
+trmm_check_service() {
+    if systemctl is-active --quiet tacticalagent 2>/dev/null; then
+        return 0  # Ativo
+    else
+        return 1  # Inativo
+    fi
+}
+
 # Função auxiliar para preparar ambiente
 trmm_preparar_ambiente() {
     echo -e "${COLOR_CYAN}${SYMBOL_LOADING} Preparando o ambiente...${COLOR_RESET}"
@@ -126,12 +144,20 @@ trmm_desinstalar_agente() {
     clear
     echo -e "${COLOR_RED}${COLOR_BOLD}"
     echo -e "╔════════════════════════════════════════════════════════════════════╗"
-    echo -e "║        ⚠️  Assistente de Desinstalação - TacticalRMM Agent         ║"
+    echo -e "║    ⚠️  Desinstalação / Limpeza - TacticalRMM Agent                 ║"
     echo -e "╚════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
     echo ""
+    
+    # Verifica se está instalado
+    if ! trmm_check_installed; then
+        echo -e "${COLOR_YELLOW}${SYMBOL_INFO} TacticalRMM Agent não está instalado.${COLOR_RESET}"
+        echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Esta opção limpará possíveis vestígios de instalações anteriores.${COLOR_RESET}"
+        echo ""
+    fi
+    
     echo -e "${COLOR_YELLOW}${COLOR_BOLD}ATENÇÃO:${COLOR_RESET}"
-    echo -e "${COLOR_YELLOW}• Isso remove o agente da máquina${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}• Isso remove o agente da máquina e limpa vestígios${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}• O agente ${COLOR_RED}NÃO${COLOR_YELLOW} será removido do painel RMM${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}• Você terá que removê-lo ${COLOR_WHITE}manualmente${COLOR_YELLOW} no painel${COLOR_RESET}"
     echo ""
@@ -170,15 +196,38 @@ trmm_desinstalar_agente() {
     
     if [[ "$CONFIRM" =~ ^[Ss]$ ]]; then
         echo ""
-        trmm_preparar_ambiente
-        
         echo -e "${COLOR_YELLOW}${SYMBOL_LOADING} Executando desinstalação...${COLOR_RESET}"
         echo ""
         
-        ./"$SCRIPT_NAME" uninstall "$MESH_FQDN" "$MESH_ID"
+        # Para o serviço se estiver rodando
+        if trmm_check_service; then
+            echo -e "${COLOR_BLUE}${SYMBOL_INFO} Parando serviço tacticalagent...${COLOR_RESET}"
+            systemctl stop tacticalagent 2>/dev/null
+        fi
+        
+        # Executa desinstalação via script (se disponível)
+        if [ -f "$SCRIPT_PATH" ]; then
+            trmm_preparar_ambiente
+            echo -e "${COLOR_BLUE}${SYMBOL_INFO} Executando script de desinstalação...${COLOR_RESET}"
+            ./"$SCRIPT_NAME" uninstall "$MESH_FQDN" "$MESH_ID" 2>/dev/null
+        fi
+        
+        # Limpeza adicional de vestígios
+        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Limpando vestígios...${COLOR_RESET}"
+        
+        # Remove serviço systemd
+        systemctl disable tacticalagent 2>/dev/null
+        rm -f /etc/systemd/system/tacticalagent.service 2>/dev/null
+        systemctl daemon-reload 2>/dev/null
+        
+        # Remove diretórios comuns do TacticalRMM
+        rm -rf /usr/local/mesh_services 2>/dev/null
+        rm -rf /usr/local/bin/tacticalagent 2>/dev/null
+        rm -rf /etc/tacticalagent 2>/dev/null
+        rm -rf "$INSTALL_DIR" 2>/dev/null
         
         echo ""
-        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Desinstalação concluída!${COLOR_RESET}"
+        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Desinstalação e limpeza concluídas!${COLOR_RESET}"
     else
         echo ""
         echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Desinstalação abortada pelo usuário.${COLOR_RESET}"
@@ -207,12 +256,41 @@ instala_tactical_rmm_menu() {
     echo -e "╚═════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
     echo ""
+    
+    # Status da instalação
+    echo -e "${COLOR_BOLD}  Status:${COLOR_RESET}"
+    echo ""
+    if trmm_check_installed; then
+        TRMM_VERSION=$(tacticalagent -m version 2>/dev/null | grep -oP '(?<=version )[0-9.]+' || echo "instalado")
+        echo -e "  ${COLOR_GREEN}${SYMBOL_CHECK} TacticalRMM Agent instalado${COLOR_RESET}"
+        
+        if trmm_check_service; then
+            echo -e "  ${COLOR_GREEN}${SYMBOL_CHECK} Serviço ativo e rodando${COLOR_RESET}"
+        else
+            echo -e "  ${COLOR_YELLOW}${SYMBOL_INFO} Serviço parado${COLOR_RESET}"
+        fi
+    else
+        echo -e "  ${COLOR_RED}${SYMBOL_ERROR} TacticalRMM Agent não instalado${COLOR_RESET}"
+    fi
+    
+    echo ""
+    echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo ""
     echo -e "${COLOR_BOLD}  Selecione uma opção:${COLOR_RESET}"
     echo ""
     echo -e "  ${COLOR_CYAN}┌───────────────────────────────────────────────────────────────┐${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalar novo agente${COLOR_RESET}                              ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Desinstalar agente existente${COLOR_RESET}                      ${COLOR_CYAN}│${COLOR_RESET}"
+    
+    # Opção 1 - Instalar (desabilitada se já instalado)
+    if trmm_check_installed; then
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}1 ➜  Instalar novo agente${COLOR_RESET} ${COLOR_GRAY}(já instalado)${COLOR_RESET}                ${COLOR_CYAN}│${COLOR_RESET}"
+    else
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalar novo agente${COLOR_RESET}                                ${COLOR_CYAN}│${COLOR_RESET}"
+    fi
+    
+    # Opção 2 - Desinstalar (sempre disponível para limpar vestígios)
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Desinstalar agente / Limpar vestígios${COLOR_RESET}                ${COLOR_CYAN}│${COLOR_RESET}"
+    
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                              ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
@@ -227,9 +305,19 @@ instala_tactical_rmm_menu() {
             instala_aplicativos_menu
         else
             case $opt in
-                1) clear;
-                   trmm_instalar_agente
-                   ;;
+                1)
+                    if trmm_check_installed; then
+                        clear
+                        echo -e "${COLOR_YELLOW}${SYMBOL_INFO} TacticalRMM Agent já está instalado!${COLOR_RESET}"
+                        echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Não é possível executar duas instâncias.${COLOR_RESET}"
+                        echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Para reinstalar, desinstale primeiro.${COLOR_RESET}"
+                        sleep 3
+                        instala_tactical_rmm_menu
+                    else
+                        clear
+                        trmm_instalar_agente
+                    fi
+                    ;;
                 2) clear;
                    trmm_desinstalar_agente
                    ;;
