@@ -36,7 +36,10 @@ instala_script(){
 SCRIPT_DIR="$SCRIPT_DIR"
 MAIN_SH="\$SCRIPT_DIR/main.sh"
 BACKUP_SH="\$SCRIPT_DIR/main.sh.backup"
-GITHUB_URL="https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main/main.sh"
+
+# URL com timestamp para forçar bypass do cache do GitHub CDN
+TIMESTAMP=\$(date +%s%N)
+GITHUB_URL="https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main/main.sh?t=\${TIMESTAMP}"
 
 # Cores para mensagens
 GREEN="\033[1;32m"

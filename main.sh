@@ -16,6 +16,9 @@ rm -f /etc/profile.d/proxmox-ini.sh 2>/dev/null
 BASE_URL="https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main"
 FUNCTIONS_DIR="$SCRIPT_DIR/functions"
 
+# Timestamp para forçar bypass de cache (cache busting)
+CACHE_BUSTER="?t=$(date +%s%N)"
+
 # Lista de arquivos necessários (nova estrutura modular)
 REQUIRED_FILES=(
     # Script Principal
@@ -94,8 +97,8 @@ run_updater() {
         
         # Extrai o caminho relativo (ex: functions/pve/arquivo.sh ou main.sh)
         RELATIVE_PATH="${FILE_PATH#"$SCRIPT_DIR/"}"
-        REMOTE_URL="$BASE_URL/$RELATIVE_PATH"
-        TMP_FILE="/tmp/$(basename "$FILE_PATH").remote"
+        REMOTE_URL="$BASE_URL/$RELATIVE_PATH$CACHE_BUSTER"
+        TMP_FILE="/tmp/$(basename "$FILE_PATH").remote.$$"
         
         # Nome do arquivo para exibição
         FILE_NAME=$(basename "$FILE_PATH")
@@ -261,7 +264,7 @@ clear
 echo -e "${COLOR_CYAN}${COLOR_BOLD}"
 echo -e "╔═══════════════════════════════════════════════════════════════════════════════╗"
 echo -e "║                                                                               ║"
-echo -e "║                    ⚠️  AVISO DE RESPONSABILIDADE  ⚠️                         ║"
+echo -e "║                    ⚠️  AVISO DE RESPONSABILIDADE  ⚠️                             ║"
 echo -e "║                                                                               ║"
 echo -e "╠═══════════════════════════════════════════════════════════════════════════════╣"
 echo -e "${COLOR_RESET}"
