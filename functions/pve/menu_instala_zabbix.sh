@@ -356,7 +356,7 @@ zabbix_remove() {
     echo -e "${COLOR_RED}${COLOR_BOLD}"
     echo -e "╔═════════════════════════════════════════════════════════════════════╗"
     echo -e "║                                                                     ║"
-    echo -e "║               ⚠️  Remover Zabbix Agent                              ║"
+    echo -e "║               ⚠️  Remover Zabbix Agent                               ║"
     echo -e "║                                                                     ║"
     echo -e "╚═════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
