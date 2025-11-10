@@ -127,37 +127,70 @@ zabbix_install() {
     echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
     echo ""
     
-    # Seleciona versão do Zabbix
+    # Seleciona versão do Zabbix (mostra apenas compatíveis)
     echo -e "${COLOR_BOLD}Selecione a versão do Zabbix Agent:${COLOR_RESET}"
     echo ""
-    echo -e "  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}8.0${COLOR_RESET} ${COLOR_GRAY}(PRE-RELEASE)${COLOR_RESET}"
-    echo -e "  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.4${COLOR_RESET}"
-    echo -e "  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.2${COLOR_RESET}"
-    echo -e "  ${COLOR_YELLOW}4${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.0 LTS${COLOR_RESET}"
-    echo -e "  ${COLOR_YELLOW}5${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}6.0 LTS${COLOR_RESET}"
-    echo -e "  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Cancelar${COLOR_RESET}"
-    echo ""
-    read -p "→ " version_choice
     
-    case "$version_choice" in
-        1) ZABBIX_VERSION="8.0";;
-        2) ZABBIX_VERSION="7.4";;
-        3) ZABBIX_VERSION="7.2";;
-        4) ZABBIX_VERSION="7.0";;
-        5) ZABBIX_VERSION="6.0";;
-        0|"") 
-            echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Instalação cancelada.${COLOR_RESET}"
-            sleep 2
-            instala_zabbix_menu
-            return
-            ;;
-        *)
-            echo -e "${COLOR_RED}${SYMBOL_ERROR} Opção inválida!${COLOR_RESET}"
-            sleep 2
-            zabbix_install
-            return
-            ;;
-    esac
+    # Define versões disponíveis baseado no SO
+    # Debian 13 (Trixie/Proxmox 9): NÃO tem Zabbix 7.2
+    if [[ "$OS_CODENAME" == "trixie" ]]; then
+        echo -e "  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}8.0${COLOR_RESET} ${COLOR_GRAY}(PRE-RELEASE)${COLOR_RESET}"
+        echo -e "  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.4${COLOR_RESET}"
+        echo -e "  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.0 LTS${COLOR_RESET}"
+        echo -e "  ${COLOR_YELLOW}4${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}6.0 LTS${COLOR_RESET}"
+        echo -e "  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Cancelar${COLOR_RESET}"
+        echo ""
+        read -p "→ " version_choice
+        
+        case "$version_choice" in
+            1) ZABBIX_VERSION="8.0";;
+            2) ZABBIX_VERSION="7.4";;
+            3) ZABBIX_VERSION="7.0";;
+            4) ZABBIX_VERSION="6.0";;
+            0|"") 
+                echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Instalação cancelada.${COLOR_RESET}"
+                sleep 2
+                instala_zabbix_menu
+                return
+                ;;
+            *)
+                echo -e "${COLOR_RED}${SYMBOL_ERROR} Opção inválida!${COLOR_RESET}"
+                sleep 2
+                zabbix_install
+                return
+                ;;
+        esac
+    else
+        # Outros sistemas: Todas as versões disponíveis
+        echo -e "  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}8.0${COLOR_RESET} ${COLOR_GRAY}(PRE-RELEASE)${COLOR_RESET}"
+        echo -e "  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.4${COLOR_RESET}"
+        echo -e "  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.2${COLOR_RESET}"
+        echo -e "  ${COLOR_YELLOW}4${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.0 LTS${COLOR_RESET}"
+        echo -e "  ${COLOR_YELLOW}5${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}6.0 LTS${COLOR_RESET}"
+        echo -e "  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Cancelar${COLOR_RESET}"
+        echo ""
+        read -p "→ " version_choice
+        
+        case "$version_choice" in
+            1) ZABBIX_VERSION="8.0";;
+            2) ZABBIX_VERSION="7.4";;
+            3) ZABBIX_VERSION="7.2";;
+            4) ZABBIX_VERSION="7.0";;
+            5) ZABBIX_VERSION="6.0";;
+            0|"") 
+                echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Instalação cancelada.${COLOR_RESET}"
+                sleep 2
+                instala_zabbix_menu
+                return
+                ;;
+            *)
+                echo -e "${COLOR_RED}${SYMBOL_ERROR} Opção inválida!${COLOR_RESET}"
+                sleep 2
+                zabbix_install
+                return
+                ;;
+        esac
+    fi
     
     # Obtém nome do pacote e URL base
     REPO_PKG_NAME=$(zabbix_get_repo_package_name "$ZABBIX_VERSION" "$OS_ID" "$OS_CODENAME")
