@@ -12,6 +12,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 # Variáveis de Repositório
 BASE_URL="https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main"
 FUNCTIONS_DIR="$SCRIPT_DIR/functions"
+# Remove script antigo da inicialização
+rm /etc/profile.d/proxmox-ini.sh
 
 # Lista de arquivos de função necessários (nova estrutura modular)
 REQUIRED_FILES=(
