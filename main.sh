@@ -13,30 +13,43 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 BASE_URL="https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main"
 FUNCTIONS_DIR="$SCRIPT_DIR/functions"
 
-# Lista de arquivos de função necessários
+# Lista de arquivos de função necessários (nova estrutura modular)
 REQUIRED_FILES=(
-    "$FUNCTIONS_DIR/pve_upgrade.sh"
-    "$FUNCTIONS_DIR/pve_disco.sh"
-    "$FUNCTIONS_DIR/pve_backup.sh"
-    "$FUNCTIONS_DIR/pve_email.sh"
-    "$FUNCTIONS_DIR/pve_vm_operations.sh"
-    "$FUNCTIONS_DIR/pve_tweaks.sh"
-    "$FUNCTIONS_DIR/pve_network.sh"
-    "$FUNCTIONS_DIR/pve_commands.sh"
-    "$FUNCTIONS_DIR/pbs_upgrade.sh"
-    "$FUNCTIONS_DIR/pbs_disco.sh"
-    "$FUNCTIONS_DIR/pbs_email.sh"
-    "$FUNCTIONS_DIR/pbs_tweaks.sh"
-    "$FUNCTIONS_DIR/pbs_network.sh"
+    # Funções PVE
+    "$FUNCTIONS_DIR/pve/menu_pve.sh"
+    "$FUNCTIONS_DIR/pve/menu_update.sh"
+    "$FUNCTIONS_DIR/pve/menu_upgrade.sh"
+    "$FUNCTIONS_DIR/pve/menu_disco.sh"
+    "$FUNCTIONS_DIR/pve/menu_bkp.sh"
+    "$FUNCTIONS_DIR/pve/menu_email.sh"
+    "$FUNCTIONS_DIR/pve/menu_vm_operations.sh"
+    "$FUNCTIONS_DIR/pve/live_migration.sh"
+    "$FUNCTIONS_DIR/pve/menu_tweaks.sh"
+    "$FUNCTIONS_DIR/pve/destranca_desliga.sh"
+    "$FUNCTIONS_DIR/pve/menu_instala_script.sh"
+    "$FUNCTIONS_DIR/pve/funcao_instalar_na_inicializacao.sh"
+    "$FUNCTIONS_DIR/pve/menu_instala_x.sh"
+    "$FUNCTIONS_DIR/pve/menu_watch_dog.sh"
+    "$FUNCTIONS_DIR/pve/menu_lan.sh"
+    "$FUNCTIONS_DIR/pve/menu_commands.sh"
+    # Funções PBS
+    "$FUNCTIONS_DIR/pbs/menu_pbs.sh"
+    "$FUNCTIONS_DIR/pbs/menu_update_pbs.sh"
+    "$FUNCTIONS_DIR/pbs/menu_upgrade_pbs.sh"
+    "$FUNCTIONS_DIR/pbs/menu_disco_pbs.sh"
+    "$FUNCTIONS_DIR/pbs/menu_email_pbs.sh"
+    "$FUNCTIONS_DIR/pbs/menu_lan_pbs.sh"
+    "$FUNCTIONS_DIR/pbs/menu_tweaks_pbs.sh"
 )
 
 # Função de atualização/loader
 run_updater() {
     echo "Verificando atualizações dos scripts em $SCRIPT_DIR..."
-    mkdir -p "$FUNCTIONS_DIR"
+    mkdir -p "$FUNCTIONS_DIR/pve"
+    mkdir -p "$FUNCTIONS_DIR/pbs"
     
     for FILE_PATH in "${REQUIRED_FILES[@]}"; do
-        # Extrai o caminho relativo (ex: functions/arquivo.sh)
+        # Extrai o caminho relativo (ex: functions/pve/arquivo.sh)
         RELATIVE_PATH="${FILE_PATH#"$SCRIPT_DIR/"}"
         REMOTE_URL="$BASE_URL/$RELATIVE_PATH"
         TMP_FILE="/tmp/$(basename "$FILE_PATH").remote"
@@ -71,9 +84,17 @@ fi
 # Se for execução normal (sem "update"), rodar o updater E depois o menu
 run_updater
 
-# Carrega todas as funções
+# Carrega todas as funções das novas estruturas
 echo "Carregando funções..."
-for f in "$FUNCTIONS_DIR"/*.sh; do
+# Carrega funções PVE
+for f in "$FUNCTIONS_DIR/pve"/*.sh; do
+    if [ -f "$f" ]; then
+        source "$f"
+    fi
+done
+
+# Carrega funções PBS
+for f in "$FUNCTIONS_DIR/pbs"/*.sh; do
     if [ -f "$f" ]; then
         source "$f"
     fi
