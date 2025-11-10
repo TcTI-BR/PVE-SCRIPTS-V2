@@ -434,14 +434,14 @@ instala_zabbix_menu() {
     
     # Opção 1 - Instalar (desabilitada se já instalado)
     if zabbix_check_installed; then
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}1 ➜  Instalar/Configurar Zabbix Agent${COLOR_RESET} ${COLOR_GRAY}(já instalado)${COLOR_RESET}      ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}1 ➜  Instalar/Configurar Zabbix Agent${COLOR_RESET} ${COLOR_GRAY}(já instalado)${COLOR_RESET}         ${COLOR_CYAN}│${COLOR_RESET}"
     else
         echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalar/Configurar Zabbix Agent${COLOR_RESET}                        ${COLOR_CYAN}│${COLOR_RESET}"
     fi
     
     # Opção 2 - Remover (requer instalação)
     if zabbix_check_installed; then
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Remover Zabbix Agent${COLOR_RESET}                                ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Remover Zabbix Agent${COLOR_RESET}                                    ${COLOR_CYAN}│${COLOR_RESET}"
     else
         echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}2 ➜  Remover Zabbix Agent${COLOR_RESET} ${COLOR_GRAY}(requer instalação)${COLOR_RESET}                ${COLOR_CYAN}│${COLOR_RESET}"
     fi
