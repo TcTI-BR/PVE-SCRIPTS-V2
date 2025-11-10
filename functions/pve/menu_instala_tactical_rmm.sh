@@ -78,12 +78,12 @@ trmm_instalar_agente() {
     echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
     echo -e "${COLOR_BOLD}📋 Revisão das Informações:${COLOR_RESET}"
     echo ""
-    echo -e "  ${COLOR_WHITE}Mesh URL:${COLOR_RESET}    $MESH_URL"
-    echo -e "  ${COLOR_WHITE}API URL:${COLOR_RESET}     $API_URL"
-    echo -e "  ${COLOR_WHITE}Client ID:${COLOR_RESET}   $CLIENT_ID"
-    echo -e "  ${COLOR_WHITE}Site ID:${COLOR_RESET}     $SITE_ID"
-    echo -e "  ${COLOR_WHITE}Auth Key:${COLOR_RESET}    ${COLOR_GRAY}[oculto por segurança]${COLOR_RESET}"
-    echo -e "  ${COLOR_WHITE}Agent Type:${COLOR_RESET}  $AGENT_TYPE"
+    echo -e "  ${COLOR_WHITE}Mesh URL:${COLOR_RESET}    \"${COLOR_CYAN}$MESH_URL${COLOR_RESET}\""
+    echo -e "  ${COLOR_WHITE}API URL:${COLOR_RESET}     \"${COLOR_CYAN}$API_URL${COLOR_RESET}\""
+    echo -e "  ${COLOR_WHITE}Client ID:${COLOR_RESET}   \"${COLOR_CYAN}$CLIENT_ID${COLOR_RESET}\""
+    echo -e "  ${COLOR_WHITE}Site ID:${COLOR_RESET}     \"${COLOR_CYAN}$SITE_ID${COLOR_RESET}\""
+    echo -e "  ${COLOR_WHITE}Auth Key:${COLOR_RESET}    \"${COLOR_GRAY}[oculto por segurança]${COLOR_RESET}\""
+    echo -e "  ${COLOR_WHITE}Agent Type:${COLOR_RESET}  \"${COLOR_CYAN}$AGENT_TYPE${COLOR_RESET}\""
     echo ""
     echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
     echo ""
@@ -95,6 +95,18 @@ trmm_instalar_agente() {
         echo ""
         trmm_preparar_ambiente
         
+        # Exibe o comando que será executado
+        echo -e "${COLOR_MAGENTA}${COLOR_BOLD}🔧 Comando que será executado:${COLOR_RESET}"
+        echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+        echo -e "${COLOR_WHITE}./$SCRIPT_NAME install \\${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}\"$MESH_URL\"${COLOR_RESET} \\"
+        echo -e "  ${COLOR_CYAN}\"$API_URL\"${COLOR_RESET} \\"
+        echo -e "  ${COLOR_CYAN}\"$CLIENT_ID\"${COLOR_RESET} \\"
+        echo -e "  ${COLOR_CYAN}\"$SITE_ID\"${COLOR_RESET} \\"
+        echo -e "  ${COLOR_CYAN}\"[AUTH_KEY_OCULTA]\"${COLOR_RESET} \\"
+        echo -e "  ${COLOR_CYAN}\"$AGENT_TYPE\"${COLOR_RESET}"
+        echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+        echo ""
         echo -e "${COLOR_YELLOW}${SYMBOL_LOADING} Executando instalação... ${COLOR_GRAY}(Isso pode demorar alguns minutos)${COLOR_RESET}"
         echo ""
         
@@ -117,7 +129,7 @@ trmm_desinstalar_agente() {
     clear
     echo -e "${COLOR_RED}${COLOR_BOLD}"
     echo -e "╔════════════════════════════════════════════════════════════════════╗"
-    echo -e "║        ⚠️  Assistente de Desinstalação - TacticalRMM Agent        ║"
+    echo -e "║        ⚠️  Assistente de Desinstalação - TacticalRMM Agent         ║"
     echo -e "╚════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
     echo ""
@@ -141,8 +153,8 @@ trmm_desinstalar_agente() {
     echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
     echo -e "${COLOR_BOLD}📋 Revisão das Informações:${COLOR_RESET}"
     echo ""
-    echo -e "  ${COLOR_WHITE}Mesh FQDN:${COLOR_RESET}  $MESH_FQDN"
-    echo -e "  ${COLOR_WHITE}Mesh ID:${COLOR_RESET}    $MESH_ID"
+    echo -e "  ${COLOR_WHITE}Mesh FQDN:${COLOR_RESET}  \"${COLOR_CYAN}$MESH_FQDN${COLOR_RESET}\""
+    echo -e "  ${COLOR_WHITE}Mesh ID:${COLOR_RESET}    \"${COLOR_CYAN}$MESH_ID${COLOR_RESET}\""
     echo ""
     echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
     echo ""
@@ -154,6 +166,14 @@ trmm_desinstalar_agente() {
         echo ""
         trmm_preparar_ambiente
         
+        # Exibe o comando que será executado
+        echo -e "${COLOR_MAGENTA}${COLOR_BOLD}🔧 Comando que será executado:${COLOR_RESET}"
+        echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+        echo -e "${COLOR_WHITE}./$SCRIPT_NAME uninstall \\${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}\"$MESH_FQDN\"${COLOR_RESET} \\"
+        echo -e "  ${COLOR_CYAN}\"$MESH_ID\"${COLOR_RESET}"
+        echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+        echo ""
         echo -e "${COLOR_YELLOW}${SYMBOL_LOADING} Executando desinstalação...${COLOR_RESET}"
         echo ""
         
@@ -183,7 +203,7 @@ instala_tactical_rmm_menu() {
     
     echo -e "${COLOR_CYAN}${COLOR_BOLD}"
     echo -e "╔════════════════════════════════════════════════════════════════════╗"
-    echo -e "║       📡 Gerenciador de Agente TacticalRMM (Netvolt)              ║"
+    echo -e "║       📡 Gerenciador de Agente TacticalRMM                         ║"
     echo -e "╚════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
     echo ""
