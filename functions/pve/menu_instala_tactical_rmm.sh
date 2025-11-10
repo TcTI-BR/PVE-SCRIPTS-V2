@@ -144,7 +144,7 @@ trmm_desinstalar_agente() {
     clear
     echo -e "${COLOR_RED}${COLOR_BOLD}"
     echo -e "╔════════════════════════════════════════════════════════════════════╗"
-    echo -e "║    ⚠️  Desinstalação / Limpeza - TacticalRMM Agent                 ║"
+    echo -e "║    ⚠️  Desinstalação / Limpeza - TacticalRMM Agent                  ║"
     echo -e "╚════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
     echo ""
@@ -251,7 +251,7 @@ instala_tactical_rmm_menu() {
     echo -e "${COLOR_CYAN}${COLOR_BOLD}"
     echo -e "╔═════════════════════════════════════════════════════════════════════╗"
     echo -e "║                                                                     ║"
-    echo -e "║             📡 Gerenciador de Agente TacticalRMM                    ║"
+    echo -e "║             📡 Gerenciador de Agente TacticalRMM                     ║"
     echo -e "║                                                                     ║"
     echo -e "╚═════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
@@ -283,16 +283,16 @@ instala_tactical_rmm_menu() {
     
     # Opção 1 - Instalar (desabilitada se já instalado)
     if trmm_check_installed; then
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}1 ➜  Instalar novo agente${COLOR_RESET} ${COLOR_GRAY}(já instalado)${COLOR_RESET}                ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}1 ➜  Instalar novo agente${COLOR_RESET} ${COLOR_GRAY}(já instalado)${COLOR_RESET}                     ${COLOR_CYAN}│${COLOR_RESET}"
     else
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalar novo agente${COLOR_RESET}                                ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalar novo agente${COLOR_RESET}                                    ${COLOR_CYAN}│${COLOR_RESET}"
     fi
     
     # Opção 2 - Desinstalar (sempre disponível para limpar vestígios)
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Desinstalar agente / Limpar vestígios${COLOR_RESET}                ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Desinstalar agente / Limpar vestígios${COLOR_RESET}                   ${COLOR_CYAN}│${COLOR_RESET}"
     
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                              ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                                  ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}└───────────────────────────────────────────────────────────────┘${COLOR_RESET}"
     echo ""
