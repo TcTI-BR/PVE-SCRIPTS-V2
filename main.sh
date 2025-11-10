@@ -103,35 +103,55 @@ run_updater() {
         # Exibe progresso
         printf "${COLOR_GRAY}[%2d/${total_files}]${COLOR_RESET} %-40s " "$current" "$FILE_NAME"
         
-        if ! curl -sL -o "$TMP_FILE" "$REMOTE_URL" 2>/dev/null; then
+        # Baixa com flags para evitar cache
+        if ! curl -sL -H "Cache-Control: no-cache, no-store, must-revalidate" \
+                    -H "Pragma: no-cache" \
+                    -H "Expires: 0" \
+                    -o "$TMP_FILE" "$REMOTE_URL" 2>/dev/null; then
             echo -e "${COLOR_RED}${SYMBOL_ERROR} Erro ao baixar${COLOR_RESET}"
             error_count=$((error_count + 1))
             continue
         fi
         
+        # Verifica se o arquivo foi baixado corretamente
+        if [ ! -s "$TMP_FILE" ]; then
+            echo -e "${COLOR_RED}${SYMBOL_ERROR} Arquivo vazio${COLOR_RESET}"
+            rm -f "$TMP_FILE"
+            error_count=$((error_count + 1))
+            continue
+        fi
+        
         if [ ! -f "$FILE_PATH" ]; then
+            # Arquivo não existe - instalar
             mv "$TMP_FILE" "$FILE_PATH"
             chmod +x "$FILE_PATH"
             echo -e "${COLOR_MAGENTA}${SYMBOL_NEW} NOVO${COLOR_RESET}"
             new_count=$((new_count + 1))
-        elif ! diff -q "$FILE_PATH" "$TMP_FILE" >/dev/null 2>&1; then
-            # Se for o main.sh, precisamos tratamento especial
-            if [[ "$FILE_NAME" == "main.sh" ]]; then
-                mv "$TMP_FILE" "$FILE_PATH"
-                chmod +x "$FILE_PATH"
-                echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} ATUALIZADO ${COLOR_MAGENTA}(reinicie o script)${COLOR_RESET}"
-                updated_count=$((updated_count + 1))
-                main_updated=1
-            else
-                mv "$TMP_FILE" "$FILE_PATH"
-                chmod +x "$FILE_PATH"
-                echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} ATUALIZADO${COLOR_RESET}"
-                updated_count=$((updated_count + 1))
-            fi
         else
-            rm "$TMP_FILE"
-            echo -e "${COLOR_GREEN}${SYMBOL_CHECK} OK${COLOR_RESET}"
-            ok_count=$((ok_count + 1))
+            # Compara usando checksum (mais confiável que diff)
+            local_hash=$(md5sum "$FILE_PATH" 2>/dev/null | awk '{print $1}')
+            remote_hash=$(md5sum "$TMP_FILE" 2>/dev/null | awk '{print $1}')
+            
+            if [ "$local_hash" != "$remote_hash" ]; then
+                # Arquivos são diferentes - atualizar
+                if [[ "$FILE_NAME" == "main.sh" ]]; then
+                    mv "$TMP_FILE" "$FILE_PATH"
+                    chmod +x "$FILE_PATH"
+                    echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} ATUALIZADO ${COLOR_MAGENTA}(reinicie o script)${COLOR_RESET}"
+                    updated_count=$((updated_count + 1))
+                    main_updated=1
+                else
+                    mv "$TMP_FILE" "$FILE_PATH"
+                    chmod +x "$FILE_PATH"
+                    echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} ATUALIZADO${COLOR_RESET}"
+                    updated_count=$((updated_count + 1))
+                fi
+            else
+                # Arquivos são idênticos - manter
+                rm "$TMP_FILE"
+                echo -e "${COLOR_GREEN}${SYMBOL_CHECK} OK${COLOR_RESET}"
+                ok_count=$((ok_count + 1))
+            fi
         fi
     done
     
