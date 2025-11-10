@@ -26,7 +26,7 @@ cloudflared_install() {
     echo -e "${COLOR_CYAN}${COLOR_BOLD}"
     echo -e "╔═════════════════════════════════════════════════════════════════════╗"
     echo -e "║                                                                     ║"
-    echo -e "║              ☁️  Instalação do Cloudflare Tunnel                    ║"
+    echo -e "║              ☁️  Instalação do Cloudflare Tunnel                     ║"
     echo -e "║                                                                     ║"
     echo -e "╚═════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
@@ -222,25 +222,25 @@ instala_cloudflared_menu() {
     if cloudflared_check_installed; then
         echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}1 ➜  Instalação do túnel Cloudflare${COLOR_RESET} ${COLOR_GRAY}(já instalado)${COLOR_RESET}   ${COLOR_CYAN}│${COLOR_RESET}"
     else
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalação do túnel Cloudflare${COLOR_RESET}                    ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalação do túnel Cloudflare${COLOR_RESET}                            ${COLOR_CYAN}│${COLOR_RESET}"
     fi
     
     # Opção 2 - Configurar serviço (requer instalação)
     if cloudflared_check_installed; then
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Configurar serviço e chave do cliente${COLOR_RESET}             ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Configurar serviço e chave do cliente${COLOR_RESET}                   ${COLOR_CYAN}│${COLOR_RESET}"
     else
         echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}2 ➜  Configurar serviço e chave do cliente${COLOR_RESET} ${COLOR_GRAY}(requer instalação)${COLOR_RESET} ${COLOR_CYAN}│${COLOR_RESET}"
     fi
     
     # Opção 3 - Remover (requer instalação)
     if cloudflared_check_installed; then
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Remover o túnel${COLOR_RESET}                                    ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Remover o túnel${COLOR_RESET}                                         ${COLOR_CYAN}│${COLOR_RESET}"
     else
         echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}3 ➜  Remover o túnel${COLOR_RESET} ${COLOR_GRAY}(requer instalação)${COLOR_RESET}              ${COLOR_CYAN}│${COLOR_RESET}"
     fi
     
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                              ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                                  ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}└───────────────────────────────────────────────────────────────┘${COLOR_RESET}"
     echo ""
