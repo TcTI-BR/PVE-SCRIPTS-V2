@@ -44,37 +44,117 @@ REQUIRED_FILES=(
     "$FUNCTIONS_DIR/pbs/menu_tweaks_pbs.sh"
 )
 
-# Função de atualização/loader
+# Cores modernas
+COLOR_RESET="\033[0m"
+COLOR_BOLD="\033[1m"
+COLOR_GREEN="\033[1;32m"
+COLOR_BLUE="\033[1;34m"
+COLOR_CYAN="\033[1;36m"
+COLOR_YELLOW="\033[1;33m"
+COLOR_RED="\033[1;31m"
+COLOR_MAGENTA="\033[1;35m"
+COLOR_WHITE="\033[1;37m"
+COLOR_GRAY="\033[0;90m"
+
+# Símbolos modernos
+SYMBOL_CHECK="✓"
+SYMBOL_ARROW="→"
+SYMBOL_NEW="✨"
+SYMBOL_UPDATE="⚡"
+SYMBOL_ERROR="✗"
+SYMBOL_INFO="ℹ"
+SYMBOL_LOADING="⟳"
+
+# Função de atualização/loader moderna
 run_updater() {
-    echo "Verificando atualizações dos scripts em $SCRIPT_DIR..."
+    clear
+    echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+    echo "╔════════════════════════════════════════════════════════════════════╗"
+    echo "║           🚀 TcTI Proxmox Scripts - Sistema de Atualização        ║"
+    echo "╚════════════════════════════════════════════════════════════════════╝"
+    echo -e "${COLOR_RESET}"
+    
     mkdir -p "$FUNCTIONS_DIR/pve"
     mkdir -p "$FUNCTIONS_DIR/pbs"
     
+    local total_files=${#REQUIRED_FILES[@]}
+    local current=0
+    local new_count=0
+    local updated_count=0
+    local ok_count=0
+    local error_count=0
+    
+    echo -e "${COLOR_BLUE}${SYMBOL_LOADING} Verificando ${total_files} arquivos...${COLOR_RESET}\n"
+    
     for FILE_PATH in "${REQUIRED_FILES[@]}"; do
+        current=$((current + 1))
+        
         # Extrai o caminho relativo (ex: functions/pve/arquivo.sh)
         RELATIVE_PATH="${FILE_PATH#"$SCRIPT_DIR/"}"
         REMOTE_URL="$BASE_URL/$RELATIVE_PATH"
         TMP_FILE="/tmp/$(basename "$FILE_PATH").remote"
         
-        echo "Verificando $RELATIVE_PATH..."
-        if ! curl -sL -o "$TMP_FILE" "$REMOTE_URL"; then
-            echo "Erro ao baixar $REMOTE_URL"
+        # Nome do arquivo para exibição
+        FILE_NAME=$(basename "$FILE_PATH")
+        
+        # Exibe progresso
+        printf "${COLOR_GRAY}[%2d/${total_files}]${COLOR_RESET} %-40s " "$current" "$FILE_NAME"
+        
+        if ! curl -sL -o "$TMP_FILE" "$REMOTE_URL" 2>/dev/null; then
+            echo -e "${COLOR_RED}${SYMBOL_ERROR} Erro ao baixar${COLOR_RESET}"
+            error_count=$((error_count + 1))
             continue
         fi
         
         if [ ! -f "$FILE_PATH" ]; then
             mv "$TMP_FILE" "$FILE_PATH"
             chmod +x "$FILE_PATH"
-            echo "Novo script instalado: $RELATIVE_PATH"
-        elif ! diff -q "$FILE_PATH" "$TMP_FILE" >/dev/null; then
+            echo -e "${COLOR_MAGENTA}${SYMBOL_NEW} NOVO${COLOR_RESET}"
+            new_count=$((new_count + 1))
+        elif ! diff -q "$FILE_PATH" "$TMP_FILE" >/dev/null 2>&1; then
             mv "$TMP_FILE" "$FILE_PATH"
             chmod +x "$FILE_PATH"
-            echo "Script atualizado: $RELATIVE_PATH"
+            echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} ATUALIZADO${COLOR_RESET}"
+            updated_count=$((updated_count + 1))
         else
-            rm "$TMP_FILE" # Sem mudanças
+            rm "$TMP_FILE"
+            echo -e "${COLOR_GREEN}${SYMBOL_CHECK} OK${COLOR_RESET}"
+            ok_count=$((ok_count + 1))
         fi
     done
-    echo "Verificação concluída."
+    
+    echo ""
+    echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo -e "${COLOR_BOLD}📊 Resumo da Verificação:${COLOR_RESET}"
+    echo ""
+    
+    if [ $new_count -gt 0 ]; then
+        echo -e "   ${COLOR_MAGENTA}${SYMBOL_NEW} Novos:        ${new_count} arquivo(s)${COLOR_RESET}"
+    fi
+    
+    if [ $updated_count -gt 0 ]; then
+        echo -e "   ${COLOR_YELLOW}${SYMBOL_UPDATE} Atualizados:  ${updated_count} arquivo(s)${COLOR_RESET}"
+    fi
+    
+    if [ $ok_count -gt 0 ]; then
+        echo -e "   ${COLOR_GREEN}${SYMBOL_CHECK} Atualizados:  ${ok_count} arquivo(s)${COLOR_RESET}"
+    fi
+    
+    if [ $error_count -gt 0 ]; then
+        echo -e "   ${COLOR_RED}${SYMBOL_ERROR} Erros:        ${error_count} arquivo(s)${COLOR_RESET}"
+    fi
+    
+    echo ""
+    
+    if [ $((new_count + updated_count)) -gt 0 ]; then
+        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Verificação concluída com atualizações!${COLOR_RESET}"
+    else
+        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Todos os arquivos estão atualizados!${COLOR_RESET}"
+    fi
+    
+    echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo ""
+    sleep 2
 }
 
 # Se o script for chamado com o argumento "update"
@@ -86,21 +166,40 @@ fi
 # Se for execução normal (sem "update"), rodar o updater E depois o menu
 run_updater
 
-# Carrega todas as funções das novas estruturas
-echo "Carregando funções..."
+# Carrega todas as funções das novas estruturas com visual moderno
+echo -e "${COLOR_BLUE}${SYMBOL_LOADING} Carregando módulos...${COLOR_RESET}"
+echo ""
+
+# Contador de funções
+pve_count=0
+pbs_count=0
+
 # Carrega funções PVE
+echo -e "${COLOR_CYAN}${SYMBOL_ARROW} Proxmox Virtual Environment (PVE)${COLOR_RESET}"
 for f in "$FUNCTIONS_DIR/pve"/*.sh; do
     if [ -f "$f" ]; then
         source "$f"
+        pve_count=$((pve_count + 1))
+        printf "  ${COLOR_GRAY}▸${COLOR_RESET} $(basename "$f")\n"
     fi
 done
 
 # Carrega funções PBS
+echo ""
+echo -e "${COLOR_CYAN}${SYMBOL_ARROW} Proxmox Backup Server (PBS)${COLOR_RESET}"
 for f in "$FUNCTIONS_DIR/pbs"/*.sh; do
     if [ -f "$f" ]; then
         source "$f"
+        pbs_count=$((pbs_count + 1))
+        printf "  ${COLOR_GRAY}▸${COLOR_RESET} $(basename "$f")\n"
     fi
 done
+
+echo ""
+echo -e "${COLOR_GREEN}${SYMBOL_CHECK} ${pve_count} módulos PVE carregados${COLOR_RESET}"
+echo -e "${COLOR_GREEN}${SYMBOL_CHECK} ${pbs_count} módulos PBS carregados${COLOR_RESET}"
+echo ""
+sleep 1
 
 # -----------------VARIAVEIS DE SISTEMA----------------------
 dnstesthost=google.com.br
@@ -112,41 +211,82 @@ hostname=$(hostname)
 date=$(date +%Y_%m_%d-%H_%M_%S)
 # ---------------FIM DAS VARIAVEIS DE SISTEMA-----------------
 
-# Banner e verificação inicial
+# Banner e verificação inicial modernos
 clear
-echo -e "\033[33m *********************************************************************************** \033[0m"
-echo -e "\033[33m * Atenção! O uso do script fornecido é de inteira responsabilidade do utilizador. *\n * A pessoa ou empresa que forneceu o script não será responsável por quaisquer    *\n *\033[31mproblemas ou danos causados\033[33m pelo uso do mesmo.                                   *\033[0m"
-echo -e "\033[33m *                                                                                 * \033[0m"
-echo -e "\033[33m * Antes de utilizar o script, é importante que você faça uma avaliação cuidadosa e*\n *compreenda as implicações do seu uso. \033[31mCertifique-se de que o script é            \033[33m*\n *\033[0m\033[31mseguro e adequado\033[33m para as suas necessidades antes de utilizá-lo.                 *\033[0m"
-echo -e "\033[33m *                                                                                 * \033[0m"
-echo -e "\033[33m * Em resumo, \033[31mutilize o script por sua conta e risco\033[33m. A pessoa ou empresa          *\n *que forneceu o script não será responsável por quaisquer problemas ou            *\n *danos causadospelo seu uso.                                                      *\033[0m"
-echo -e "\033[33m *                                                                                 * \033[0m"
-echo -e "\033[33m * Ao pressionar uma tecla você concorda com os riscos...                          *\033[0m"
-echo -e "\033[33m *********************************************************************************** \033[0m"
-read -p  " "
+echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+echo "╔═══════════════════════════════════════════════════════════════════════════════╗"
+echo "║                                                                               ║"
+echo "║                    ⚠️  AVISO DE RESPONSABILIDADE  ⚠️                          ║"
+echo "║                                                                               ║"
+echo "╠═══════════════════════════════════════════════════════════════════════════════╣"
+echo -e "${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}${COLOR_BOLD}"
+echo "  O uso deste script é de ${COLOR_RED}INTEIRA RESPONSABILIDADE${COLOR_YELLOW} do utilizador."
+echo -e "${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_WHITE}  • A pessoa ou empresa que forneceu o script ${COLOR_RED}NÃO SERÁ RESPONSÁVEL${COLOR_WHITE}"
+echo -e "    por quaisquer ${COLOR_RED}problemas ou danos causados${COLOR_WHITE} pelo uso do mesmo.${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_WHITE}  • Antes de utilizar, faça uma ${COLOR_GREEN}avaliação cuidadosa${COLOR_WHITE} e compreenda"
+echo -e "    as implicações do seu uso.${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_WHITE}  • ${COLOR_RED}Certifique-se${COLOR_WHITE} de que o script é ${COLOR_GREEN}seguro e adequado${COLOR_WHITE} para"
+echo -e "    as suas necessidades antes de utilizá-lo.${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+echo "╠═══════════════════════════════════════════════════════════════════════════════╣"
+echo "║                                                                               ║"
+echo -e "║  ${COLOR_YELLOW}➜${COLOR_CYAN}  Ao pressionar ENTER você ${COLOR_RED}CONCORDA${COLOR_CYAN} com os termos acima         ${COLOR_CYAN}║"
+echo "║                                                                               ║"
+echo "╚═══════════════════════════════════════════════════════════════════════════════╝"
+echo -e "${COLOR_RESET}"
+read -p ""
 clear
 
-# Verificando se é root
-if [[ $(id -u) -ne 0 ]] ; then echo "- Por favor execute com o root / sudo" ; exit 1 ; fi
+# Verificando se é root com visual moderno
+if [[ $(id -u) -ne 0 ]] ; then 
+    echo -e "${COLOR_RED}${COLOR_BOLD}"
+    echo "╔═══════════════════════════════════════════════════════════════╗"
+    echo "║                                                               ║"
+    echo "║  ✗ ERRO: Este script precisa ser executado como ROOT         ║"
+    echo "║                                                               ║"
+    echo "║  Por favor execute com:                                       ║"
+    echo "║    • sudo ./main.sh                                           ║"
+    echo "║    • su - (e depois execute ./main.sh)                        ║"
+    echo "║                                                               ║"
+    echo "╚═══════════════════════════════════════════════════════════════╝"
+    echo -e "${COLOR_RESET}"
+    exit 1
+fi
 
-# Menu Principal
+# Menu Principal Moderno
 main_menu(){
     clear
-    NORMAL=`echo "\033[m"`
-    MENU=`echo "\033[36m"` #Azul
-    NUMBER=`echo "\033[33m"` #Amarelo
-    FGRED=`echo "\033[41m"`
-    RED_TEXT=`echo "\033[31m"`
-    ENTER_LINE=`echo "\033[33m"`
-    echo -e "${MENU}******************* Script ($version) para Proxmox *******************${NORMAL}"
-    echo -e "${MENU}********************** Por Marcelo Machado ****************************${NORMAL}"
-    echo " "
-    echo -e "${MENU}**${NUMBER} 1)${MENU} Proxmox Virtual Environment ${NORMAL}"
-    echo -e "${MENU}**${NUMBER} 2)${MENU} Proxmox Backup Server ${NORMAL}"
-    echo -e "${MENU}**${NUMBER} 0)${MENU} Sair ${NORMAL}"
-    echo " "
-    echo -e "${MENU}***********************************************************************${NORMAL}"
-    echo -e "${ENTER_LINE}Digite um numero dentre as opções acima ou pressione ${RED_TEXT}ENTER ${ENTER_LINE}para sair.${NORMAL} "
+    echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+    echo "╔═══════════════════════════════════════════════════════════════════════════════╗"
+    echo "║                                                                               ║"
+    echo "║               🚀 TcTI Proxmox Scripts - Menu Principal                        ║"
+    echo "║                      Versão: ${COLOR_YELLOW}$version${COLOR_CYAN}                                         ║"
+    echo "║                    Desenvolvido por: ${COLOR_WHITE}Marcelo Machado${COLOR_CYAN}                      ║"
+    echo "║                                                                               ║"
+    echo "╚═══════════════════════════════════════════════════════════════════════════════╝"
+    echo -e "${COLOR_RESET}"
+    echo ""
+    echo -e "${COLOR_BOLD}  Selecione uma opção:${COLOR_RESET}"
+    echo ""
+    echo -e "  ${COLOR_CYAN}┌─────────────────────────────────────────────────────────────────┐${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Proxmox Virtual Environment (PVE)${COLOR_RESET}                 ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}       ${COLOR_GRAY}Gerenciamento completo do Proxmox VE${COLOR_RESET}                 ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Proxmox Backup Server (PBS)${COLOR_RESET}                       ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}       ${COLOR_GRAY}Gerenciamento do Proxmox Backup Server${COLOR_RESET}               ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Sair${COLOR_RESET}                                                  ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}└─────────────────────────────────────────────────────────────────┘${COLOR_RESET}"
+    echo ""
+    echo -e "${COLOR_YELLOW}  Digite sua opção ${COLOR_GRAY}(ou pressione ENTER para sair)${COLOR_YELLOW}: ${COLOR_RESET}"
     read -rsn1 opt
 	while [ opt != '' ]
   do
