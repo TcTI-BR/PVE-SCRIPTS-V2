@@ -1,161 +1,223 @@
 #!/bin/bash
 
-# ---
 # Script de Gerenciamento Interativo para TacticalRMM
-# Criado por Gemini, com base na solicitação do usuário.
-# ---
+# Adaptado ao padrão visual moderno do projeto
 
-# --- Configurações ---
-# Diretório de instalação (baseado no seu script anterior)
+# Configurações
 INSTALL_DIR="/TcTI/TRMM"
-# URL do script de instalação do RMM
 SCRIPT_URL="https://raw.githubusercontent.com/netvolt/LinuxRMM-Script/main/rmmagent-linux.sh"
-# Nome do script local
 SCRIPT_NAME="rmmagent-linux.sh"
-# Caminho completo do script
 SCRIPT_PATH="$INSTALL_DIR/$SCRIPT_NAME"
 
-# --- Funções Auxiliares ---
-
-# Garante que as dependências e o script estejam prontos
-preparar_ambiente() {
-    echo "Preparando o ambiente..."
+# Função auxiliar para preparar ambiente
+trmm_preparar_ambiente() {
+    echo -e "${COLOR_CYAN}${SYMBOL_LOADING} Preparando o ambiente...${COLOR_RESET}"
+    echo ""
     
-    # 1. Garante que as dependências (wget, unzip) estão instaladas
-    echo "Verificando dependências (wget, unzip)..."
+    # Verifica e instala dependências
+    echo -e "${COLOR_BLUE}${SYMBOL_INFO} Verificando dependências (wget, unzip)...${COLOR_RESET}"
     if ! command -v wget &> /dev/null || ! command -v unzip &> /dev/null; then
         apt update
         apt install wget unzip -y
     fi
+    echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Dependências OK${COLOR_RESET}"
+    echo ""
     
-    # 2. Cria o diretório de instalação
+    # Cria diretório de instalação
     mkdir -p "$INSTALL_DIR"
     
-    # 3. Baixa o script do RMM (se não existir ou se for forçado)
+    # Baixa o script do RMM
     if [ ! -f "$SCRIPT_PATH" ] || [ "$1" == "force" ]; then
-        echo "Baixando o script 'rmmagent-linux.sh'..."
+        echo -e "${COLOR_BLUE}${SYMBOL_LOADING} Baixando script 'rmmagent-linux.sh'...${COLOR_RESET}"
         wget -O "$SCRIPT_PATH" "$SCRIPT_URL"
         chmod +x "$SCRIPT_PATH"
+        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Download concluído${COLOR_RESET}"
     else
-        echo "Script 'rmmagent-linux.sh' já existe."
-        chmod +x "$SCRIPT_PATH" # Garante que é executável
+        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Script 'rmmagent-linux.sh' já existe${COLOR_RESET}"
+        chmod +x "$SCRIPT_PATH"
     fi
+    echo ""
     
-    # Entra no diretório para execução
     cd "$INSTALL_DIR" || exit 1
 }
 
-# --- Funções Principais ---
-
 # Função para INSTALAR o agente
-instalar_agente() {
-    echo "----------------------------------------"
-    echo " Assistente de Instalação TacticalRMM"
-    echo "----------------------------------------"
-    echo "Por favor, insira as informações solicitadas (encontradas no seu painel RMM):"
+trmm_instalar_agente() {
+    clear
+    echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+    echo -e "╔════════════════════════════════════════════════════════════════════╗"
+    echo -e "║        🚀 Assistente de Instalação - TacticalRMM Agent            ║"
+    echo -e "╚════════════════════════════════════════════════════════════════════╝"
+    echo -e "${COLOR_RESET}"
     echo ""
-
-    # Solicita cada parâmetro interativamente
-    read -p "1. Insira a URL do 'Mesh agent' (com aspas simples): " MESH_URL
-    read -p "2. Insira a 'API URL' (ex: https://api.example.com): " API_URL
-    read -p "3. Insira o 'Client ID' (numérico): " CLIENT_ID
-    read -p "4. Insira o 'Site ID' (numérico): " SITE_ID
-    read -p "5. Insira a 'Auth Key' (chave longa): " AUTH_KEY
-    read -p "6. Insira o 'Agent Type' (server/workstation) [Padrão: server]: " AGENT_TYPE
-
-    # Define 'server' como padrão se nada for digitado
-    AGENT_TYPE=${AGENT_TYPE:-server}
-
+    echo -e "${COLOR_YELLOW}Por favor, insira as informações do seu painel RMM:${COLOR_RESET}"
     echo ""
-    echo "--- Revisão ---"
-    echo "Mesh URL:   $MESH_URL"
-    echo "API URL:    $API_URL"
-    echo "Client ID:  $CLIENT_ID"
-    echo "Site ID:    $SITE_ID"
-    echo "Auth Key:   [oculto]"
-    echo "Agent Type: $AGENT_TYPE"
-    echo "---------------"
     
-    read -p "As informações estão corretas? (s/n): " CONFIRM
-
+    # Solicita parâmetros
+    echo -e "${COLOR_WHITE}1.${COLOR_RESET} Insira a URL do ${COLOR_CYAN}Mesh agent${COLOR_RESET} (com aspas simples):"
+    read -p "   → " MESH_URL
+    
+    echo -e "${COLOR_WHITE}2.${COLOR_RESET} Insira a ${COLOR_CYAN}API URL${COLOR_RESET} (ex: https://api.example.com):"
+    read -p "   → " API_URL
+    
+    echo -e "${COLOR_WHITE}3.${COLOR_RESET} Insira o ${COLOR_CYAN}Client ID${COLOR_RESET} (numérico):"
+    read -p "   → " CLIENT_ID
+    
+    echo -e "${COLOR_WHITE}4.${COLOR_RESET} Insira o ${COLOR_CYAN}Site ID${COLOR_RESET} (numérico):"
+    read -p "   → " SITE_ID
+    
+    echo -e "${COLOR_WHITE}5.${COLOR_RESET} Insira a ${COLOR_CYAN}Auth Key${COLOR_RESET} (chave longa):"
+    read -p "   → " AUTH_KEY
+    
+    echo -e "${COLOR_WHITE}6.${COLOR_RESET} Insira o ${COLOR_CYAN}Agent Type${COLOR_RESET} (server/workstation) [Padrão: ${COLOR_GREEN}server${COLOR_RESET}]:"
+    read -p "   → " AGENT_TYPE
+    AGENT_TYPE=${AGENT_TYPE:-server}
+    
+    # Revisão
+    echo ""
+    echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo -e "${COLOR_BOLD}📋 Revisão das Informações:${COLOR_RESET}"
+    echo ""
+    echo -e "  ${COLOR_WHITE}Mesh URL:${COLOR_RESET}    $MESH_URL"
+    echo -e "  ${COLOR_WHITE}API URL:${COLOR_RESET}     $API_URL"
+    echo -e "  ${COLOR_WHITE}Client ID:${COLOR_RESET}   $CLIENT_ID"
+    echo -e "  ${COLOR_WHITE}Site ID:${COLOR_RESET}     $SITE_ID"
+    echo -e "  ${COLOR_WHITE}Auth Key:${COLOR_RESET}    ${COLOR_GRAY}[oculto por segurança]${COLOR_RESET}"
+    echo -e "  ${COLOR_WHITE}Agent Type:${COLOR_RESET}  $AGENT_TYPE"
+    echo ""
+    echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo ""
+    
+    echo -e "${COLOR_YELLOW}As informações estão corretas?${COLOR_RESET} (${COLOR_GREEN}s${COLOR_RESET}/${COLOR_RED}n${COLOR_RESET})"
+    read -p "→ " CONFIRM
+    
     if [[ "$CONFIRM" =~ ^[Ss]$ ]]; then
-        echo "Preparando o ambiente para instalação..."
-        preparar_ambiente
+        echo ""
+        trmm_preparar_ambiente
         
-        echo "Executando o script de instalação... (Isso pode demorar alguns minutos)"
-        # Executa o comando de instalação com todas as variáveis entre aspas
+        echo -e "${COLOR_YELLOW}${SYMBOL_LOADING} Executando instalação... ${COLOR_GRAY}(Isso pode demorar alguns minutos)${COLOR_RESET}"
+        echo ""
+        
         ./"$SCRIPT_NAME" install "$MESH_URL" "$API_URL" "$CLIENT_ID" "$SITE_ID" "$AUTH_KEY" "$AGENT_TYPE"
         
-        echo "Instalação concluída."
+        echo ""
+        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Instalação concluída!${COLOR_RESET}"
     else
-        echo "Instalação abortada."
+        echo ""
+        echo -e "${COLOR_RED}${SYMBOL_ERROR} Instalação abortada pelo usuário.${COLOR_RESET}"
     fi
+    
+    echo ""
+    read -p "Pressione ENTER para continuar..."
+    instala_tactical_rmm_menu
 }
 
 # Função para DESINSTALAR o agente
-desinstalar_agente() {
-    echo "------------------------------------------"
-    echo " Assistente de Desinstalação TacticalRMM"
-    echo "------------------------------------------"
-    echo "ATENÇÃO: Isso remove o agente da máquina, mas NÃO o remove"
-    echo "do painel do RMM. Você terá que removê-lo manualmente."
+trmm_desinstalar_agente() {
+    clear
+    echo -e "${COLOR_RED}${COLOR_BOLD}"
+    echo -e "╔════════════════════════════════════════════════════════════════════╗"
+    echo -e "║        ⚠️  Assistente de Desinstalação - TacticalRMM Agent        ║"
+    echo -e "╚════════════════════════════════════════════════════════════════════╝"
+    echo -e "${COLOR_RESET}"
     echo ""
-
-    # Solicita os parâmetros de desinstalação
-    read -p "1. Insira o 'Mesh FQDN' (ex: mesh.example.com): " MESH_FQDN
-    read -p "2. Insira o 'Mesh ID' (a chave longa de 64 caracteres): " MESH_ID
+    echo -e "${COLOR_YELLOW}${COLOR_BOLD}ATENÇÃO:${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}• Isso remove o agente da máquina${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}• O agente ${COLOR_RED}NÃO${COLOR_YELLOW} será removido do painel RMM${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}• Você terá que removê-lo ${COLOR_WHITE}manualmente${COLOR_YELLOW} no painel${COLOR_RESET}"
+    echo ""
+    echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo ""
     
+    # Solicita parâmetros
+    echo -e "${COLOR_WHITE}1.${COLOR_RESET} Insira o ${COLOR_CYAN}Mesh FQDN${COLOR_RESET} (ex: mesh.example.com):"
+    read -p "   → " MESH_FQDN
+    
+    echo -e "${COLOR_WHITE}2.${COLOR_RESET} Insira o ${COLOR_CYAN}Mesh ID${COLOR_RESET} (chave longa de 64 caracteres):"
+    read -p "   → " MESH_ID
+    
+    # Revisão
     echo ""
-    echo "--- Revisão ---"
-    echo "Mesh FQDN: $MESH_FQDN"
-    echo "Mesh ID:   $MESH_ID"
-    echo "---------------"
-
-    read -p "Confirmar desinstalação? (s/n): " CONFIRM
-
+    echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo -e "${COLOR_BOLD}📋 Revisão das Informações:${COLOR_RESET}"
+    echo ""
+    echo -e "  ${COLOR_WHITE}Mesh FQDN:${COLOR_RESET}  $MESH_FQDN"
+    echo -e "  ${COLOR_WHITE}Mesh ID:${COLOR_RESET}    $MESH_ID"
+    echo ""
+    echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo ""
+    
+    echo -e "${COLOR_RED}${COLOR_BOLD}Confirmar desinstalação?${COLOR_RESET} (${COLOR_GREEN}s${COLOR_RESET}/${COLOR_RED}n${COLOR_RESET})"
+    read -p "→ " CONFIRM
+    
     if [[ "$CONFIRM" =~ ^[Ss]$ ]]; then
-        echo "Preparando o ambiente para desinstalação..."
-        preparar_ambiente
+        echo ""
+        trmm_preparar_ambiente
         
-        echo "Executando o script de desinstalação..."
-        # Executa o comando de desinstalação
+        echo -e "${COLOR_YELLOW}${SYMBOL_LOADING} Executando desinstalação...${COLOR_RESET}"
+        echo ""
+        
         ./"$SCRIPT_NAME" uninstall "$MESH_FQDN" "$MESH_ID"
         
-        echo "Desinstalação concluída."
+        echo ""
+        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Desinstalação concluída!${COLOR_RESET}"
     else
-        echo "Desinstalação abortada."
+        echo ""
+        echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Desinstalação abortada pelo usuário.${COLOR_RESET}"
     fi
+    
+    echo ""
+    read -p "Pressione ENTER para continuar..."
+    instala_tactical_rmm_menu
 }
 
-# --- Menu Principal ---
-clear
-echo "==============================================="
-echo "  Gerenciador de Agente TacticalRMM (Netvolt)"
-echo "==============================================="
-echo "Este script irá ajudá-lo a instalar ou desinstalar"
-echo "o agente RMM de forma interativa."
-echo ""
-echo "O que você gostaria de fazer?"
-echo ""
-echo "   1) Instalar um novo agente"
-echo "   2) Desinstalar um agente existente"
-echo "   3) Sair"
-echo ""
-read -p "Escolha uma opção (1, 2 ou 3): " MENU_CHOICE
+# Menu principal
+instala_tactical_rmm_menu() {
+    clear
+    NORMAL=`echo "\033[m"`
+    MENU=`echo "\033[36m"`
+    NUMBER=`echo "\033[33m"`
+    FGRED=`echo "\033[41m"`
+    RED_TEXT=`echo "\033[31m"`
+    ENTER_LINE=`echo "\033[33m"`
+    
+    echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+    echo -e "╔════════════════════════════════════════════════════════════════════╗"
+    echo -e "║       📡 Gerenciador de Agente TacticalRMM (Netvolt)              ║"
+    echo -e "╚════════════════════════════════════════════════════════════════════╝"
+    echo -e "${COLOR_RESET}"
+    echo ""
+    echo -e "${COLOR_WHITE}Este assistente ajuda a instalar ou desinstalar o agente RMM${COLOR_RESET}"
+    echo -e "${COLOR_WHITE}de forma interativa e segura.${COLOR_RESET}"
+    echo ""
+    echo -e "${MENU}**${NUMBER} 1)${MENU} Instalar novo agente ${NORMAL}"
+    echo -e "${MENU}**${NUMBER} 2)${MENU} Desinstalar agente existente ${NORMAL}"
+    echo -e "${MENU}**${NUMBER} 0)${MENU} Voltar ao menu anterior ${NORMAL}"
+    echo ""
+    echo -e "${MENU}***********************************************************************${NORMAL}"
+    echo -e "${ENTER_LINE}Digite um número dentre as opções acima ou pressione ${RED_TEXT}ENTER ${ENTER_LINE}para sair.${NORMAL}"
+    read -rsn1 opt
+    
+    while [ opt != '' ]
+    do
+        if [[ $opt = "" ]]; then
+            update_menu
+        else
+            case $opt in
+                1) clear;
+                   trmm_instalar_agente
+                   ;;
+                2) clear;
+                   trmm_desinstalar_agente
+                   ;;
+                0) clear;
+                   update_menu
+                   ;;
+                *) clear;
+                   update_menu
+                   ;;
+            esac
+        fi
+    done
+}
 
-case $MENU_CHOICE in
-    1)
-        instalar_agente
-        ;;
-    2)
-        desinstalar_agente
-        ;;
-    3)
-        echo "Saindo."
-        ;;
-    *)
-        echo "Opção inválida. Saindo."
-        ;;
-esac
-
-exit 0
