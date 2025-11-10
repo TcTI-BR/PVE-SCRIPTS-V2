@@ -13,24 +13,29 @@ instala_aplicativos_menu(){
 	
 	echo -e "${COLOR_CYAN}${COLOR_BOLD}"
 	echo -e "╔════════════════════════════════════════════════════════════════════╗"
-	echo -e "║             📦 Instalação de Aplicativos e Ferramentas             ║"
+	echo -e "║                                                                    ║"
+	echo -e "║            📦 Instalação de Aplicativos e Ferramentas             ║"
+	echo -e "║                                                                    ║"
 	echo -e "╚════════════════════════════════════════════════════════════════════╝"
 	echo -e "${COLOR_RESET}"
 	echo ""
-	echo -e "${COLOR_WHITE}Selecione o aplicativo que deseja instalar:${COLOR_RESET}"
+	echo -e "${COLOR_BOLD}  Selecione o aplicativo que deseja instalar:${COLOR_RESET}"
 	echo ""
-	echo -e "${MENU}**${NUMBER} 1)${MENU} TacticalRMM - Remote Monitoring & Management ${NORMAL}"
-	echo -e "${COLOR_GRAY}       Agente de monitoramento remoto  ${NORMAL}"
+	echo -e "  ${COLOR_CYAN}┌──────────────────────────────────────────────────────────────┐${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                              ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}TacticalRMM - Remote Monitoring & Management${COLOR_RESET}     ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}       ${COLOR_GRAY}Agente de monitoramento remoto${COLOR_RESET}                       ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                              ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GRAY}➜  Zabbix Agent${COLOR_RESET} ${COLOR_GRAY}(Em breve)${COLOR_RESET}                       ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}       ${COLOR_GRAY}Sistema de monitoramento de infraestrutura${COLOR_RESET}           ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                              ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GRAY}➜  Outros aplicativos${COLOR_RESET} ${COLOR_GRAY}(Em breve)${COLOR_RESET}                  ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                              ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar ao menu anterior${COLOR_RESET}                         ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                              ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}└──────────────────────────────────────────────────────────────┘${COLOR_RESET}"
 	echo ""
-	echo -e "${MENU}**${NUMBER} 2)${MENU} ${COLOR_GRAY}Zabbix Agent (Em breve)${NORMAL}"
-	echo -e "${COLOR_GRAY}       Sistema de monitoramento de infraestrutura${NORMAL}"
-	echo ""
-	echo -e "${MENU}**${NUMBER} 3)${MENU} ${COLOR_GRAY}Outros aplicativos (Em breve)${NORMAL}"
-	echo ""
-	echo -e "${MENU}**${NUMBER} 0)${MENU} Voltar ao menu anterior ${NORMAL}"
-	echo ""
-	echo -e "${MENU}***********************************************************************${NORMAL}"
-	echo -e "${ENTER_LINE}Digite um número dentre as opções acima ou pressione ${RED_TEXT}ENTER ${ENTER_LINE}para sair.${NORMAL}"
+	echo -e "${COLOR_YELLOW}  Digite sua opção ${COLOR_GRAY}(ou pressione ENTER para sair)${COLOR_YELLOW}: ${COLOR_RESET}"
 	read -rsn1 opt
 	
 	while [ opt != '' ]
@@ -62,5 +67,4 @@ instala_aplicativos_menu(){
 		fi
 	done
 }
-
 

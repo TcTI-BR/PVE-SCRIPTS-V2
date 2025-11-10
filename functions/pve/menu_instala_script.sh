@@ -5,31 +5,43 @@
 instala_script(){
 	clear
 	NORMAL=`echo "\033[m"`
-    MENU=`echo "\033[36m"` #Azul
-    NUMBER=`echo "\033[33m"` #Amarelo
-    FGRED=`echo "\033[41m"`
-    RED_TEXT=`echo "\033[31m"`
-    ENTER_LINE=`echo "\033[33m"`
-    echo -e "${MENU}********* Script ($version) para Proxmox Virtual Environment *********${NORMAL}"
-    echo -e "${MENU}********************** Por Marcelo Machado ****************************${NORMAL}"
-	echo " "
-	echo -e "${MENU}**${NUMBER} 1)${MENU} Instala o script ao carregar o usuário ${NORMAL}"
-	echo -e "${MENU}**${NUMBER} 2)${MENU} Desinstala o script ao carregar o usuario ${NORMAL}"
-	echo -e "${MENU}**${NUMBER} 0)${MENU} Voltar ${NORMAL}"
-	echo " "
-	echo -e "${MENU}***********************************************************************${NORMAL}"
-	echo -e "${ENTER_LINE}Digite um numero dentre as opções acima ou pressione ${RED_TEXT}ENTER ${ENTER_LINE}para sair.${NORMAL} "
+	MENU=`echo "\033[36m"`
+	NUMBER=`echo "\033[33m"`
+	FGRED=`echo "\033[41m"`
+	RED_TEXT=`echo "\033[31m"`
+	ENTER_LINE=`echo "\033[33m"`
+	
+	echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+	echo -e "╔═════════════════════════════════════════════════════════════════════╗"
+	echo -e "║                                                                     ║"
+	echo -e "║              🚀 Auto-Inicialização do Script                        ║"
+	echo -e "║                                                                     ║"
+	echo -e "╚═════════════════════════════════════════════════════════════════════╝"
+	echo -e "${COLOR_RESET}"
+	echo ""
+	echo -e "${COLOR_BOLD}  Selecione uma opção:${COLOR_RESET}"
+	echo ""
+	echo -e "  ${COLOR_CYAN}┌───────────────────────────────────────────────────────────────┐${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instala script ao carregar o usuário${COLOR_RESET}              ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Desinstala script ao carregar o usuário${COLOR_RESET}           ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                              ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}└───────────────────────────────────────────────────────────────┘${COLOR_RESET}"
+	echo ""
+	echo -e "${COLOR_YELLOW}  Digite sua opção ${COLOR_GRAY}(ou pressione ENTER para sair)${COLOR_YELLOW}: ${COLOR_RESET}"
 	read -rsn1 opt
 	while [ opt != '' ]	
 	do
 		if [[ $opt = "" ]]; then
 			exit;
 		else
-	case $opt in
-		1) clear;
-		# Cria script para executar main.sh ao carregar o shell
-		# Com atualização forçada do main.sh antes de executar
-		cat > /etc/profile.d/tcti-proxmox-auto.sh << 'EOF'
+			case $opt in
+				1) clear;
+				# Cria script para executar main.sh ao carregar o shell
+				# Com atualização forçada do main.sh antes de executar
+				cat > /etc/profile.d/tcti-proxmox-auto.sh << 'EOF'
 #!/bin/bash
 
 # Diretório do script
@@ -86,38 +98,38 @@ else
     fi
 fi
 EOF
-		# Substitui a variável SCRIPT_DIR no arquivo
-		sed -i "s|\$SCRIPT_DIR|$SCRIPT_DIR|g" /etc/profile.d/tcti-proxmox-auto.sh
-		chmod +x /etc/profile.d/tcti-proxmox-auto.sh
-		echo ""
-		echo "✓ Script instalado com atualização automática do main.sh!"
-		echo ""
-		echo "Agora, toda vez que abrir o terminal:"
-		echo "  1. O main.sh será DELETADO"
-		echo "  2. Baixará a versão mais recente do GitHub"
-		echo "  3. Executará automaticamente"
-		echo ""
-		read -p "Pressione uma tecla para continuar..."
-		clear	  
-		instala_script
-			;;
-		2) clear;
-		# Remove o script de inicialização
-		rm -f /etc/profile.d/tcti-proxmox-auto.sh
-		echo "Script removido! O main.sh não será mais executado automaticamente."
-		read -p "Pressione uma tecla para continuar..."
-		clear	  
-		instala_script
-			;;
-		0) clear;
-		tweaks_menu;
-			;;
-		*) clear
-		tweaks_menu;
-			;;			
-      esac
-    fi
-  done
-instala_script
+				# Substitui a variável SCRIPT_DIR no arquivo
+				sed -i "s|\$SCRIPT_DIR|$SCRIPT_DIR|g" /etc/profile.d/tcti-proxmox-auto.sh
+				chmod +x /etc/profile.d/tcti-proxmox-auto.sh
+				echo ""
+				echo "✓ Script instalado com atualização automática do main.sh!"
+				echo ""
+				echo "Agora, toda vez que abrir o terminal:"
+				echo "  1. O main.sh será DELETADO"
+				echo "  2. Baixará a versão mais recente do GitHub"
+				echo "  3. Executará automaticamente"
+				echo ""
+				read -p "Pressione uma tecla para continuar..."
+				clear	  
+				instala_script
+					;;
+				2) clear;
+				# Remove o script de inicialização
+				rm -f /etc/profile.d/tcti-proxmox-auto.sh
+				echo "Script removido! O main.sh não será mais executado automaticamente."
+				read -p "Pressione uma tecla para continuar..."
+				clear	  
+				instala_script
+					;;
+				0) clear;
+				tweaks_menu;
+					;;
+				*) clear
+				tweaks_menu;
+					;;			
+			esac
+		fi
+	done
+	instala_script
 }
 
