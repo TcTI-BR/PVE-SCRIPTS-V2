@@ -97,11 +97,72 @@ tweaks_pbs_menu(){
 	;;
 	4)	clear;
 	# Cria script para executar main.sh ao carregar o shell
-	echo "#!/bin/bash" > /etc/profile.d/tcti-proxmox-auto.sh
-	echo "cd $SCRIPT_DIR" >> /etc/profile.d/tcti-proxmox-auto.sh
-	echo "./main.sh" >> /etc/profile.d/tcti-proxmox-auto.sh
+	# Com atualização forçada do main.sh antes de executar
+	cat > /etc/profile.d/tcti-proxmox-auto.sh << 'EOF'
+#!/bin/bash
+
+# Diretório do script
+SCRIPT_DIR="$SCRIPT_DIR"
+MAIN_SH="\$SCRIPT_DIR/main.sh"
+BACKUP_SH="\$SCRIPT_DIR/main.sh.backup"
+GITHUB_URL="https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main/main.sh"
+
+# Cores para mensagens
+GREEN="\033[1;32m"
+YELLOW="\033[1;33m"
+CYAN="\033[1;36m"
+RESET="\033[0m"
+
+echo -e "\${CYAN}🔄 Atualizando main.sh...${RESET}"
+
+# Faz backup do main.sh atual
+if [ -f "\$MAIN_SH" ]; then
+    cp "\$MAIN_SH" "\$BACKUP_SH"
+fi
+
+# Remove o main.sh atual
+rm -f "\$MAIN_SH"
+
+# Baixa a versão mais recente (sem cache)
+if curl -sL -H "Cache-Control: no-cache, no-store, must-revalidate" \\
+        -H "Pragma: no-cache" \\
+        -H "Expires: 0" \\
+        -o "\$MAIN_SH" "\$GITHUB_URL" 2>/dev/null; then
+    
+    chmod +x "\$MAIN_SH"
+    echo -e "\${GREEN}✓ main.sh atualizado com sucesso!\${RESET}"
+    
+    # Remove o backup se tudo deu certo
+    rm -f "\$BACKUP_SH"
+    
+    # Executa o main.sh atualizado
+    cd "\$SCRIPT_DIR"
+    ./main.sh
+else
+    echo -e "\${YELLOW}⚠ Erro ao baixar main.sh, usando versão de backup...\${RESET}"
+    
+    # Restaura o backup se o download falhou
+    if [ -f "\$BACKUP_SH" ]; then
+        mv "\$BACKUP_SH" "\$MAIN_SH"
+        chmod +x "\$MAIN_SH"
+        cd "\$SCRIPT_DIR"
+        ./main.sh
+    else
+        echo -e "\${YELLOW}✗ Nenhum backup disponível. Execute manualmente: cd $SCRIPT_DIR && ./main.sh\${RESET}"
+    fi
+fi
+EOF
+	# Substitui a variável SCRIPT_DIR no arquivo
+	sed -i "s|\$SCRIPT_DIR|$SCRIPT_DIR|g" /etc/profile.d/tcti-proxmox-auto.sh
 	chmod +x /etc/profile.d/tcti-proxmox-auto.sh
-	echo "Script instalado! O main.sh será executado automaticamente ao abrir o shell."
+	echo ""
+	echo "✓ Script instalado com atualização automática do main.sh!"
+	echo ""
+	echo "Agora, toda vez que abrir o terminal:"
+	echo "  1. O main.sh será DELETADO"
+	echo "  2. Baixará a versão mais recente do GitHub"
+	echo "  3. Executará automaticamente"
+	echo ""
 	read -p "Pressione uma tecla para continuar..."
 	clear	  
   tweaks_pbs_menu
