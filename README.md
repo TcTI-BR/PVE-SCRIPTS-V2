@@ -25,15 +25,11 @@ Este projeto oferece uma interface interativa via terminal para gerenciar opera�
 ## Instalação
 
 ```bash
-# Clone o repositório
-git clone https://github.com/TcTI-BR/PVE-SCRIPTS-V2.git
-
-# Entre no diretório
-cd PVE-SCRIPTS-V2
-
-# Execute o script principal
-bash main.sh
+# Cria diretório, baixa e executa o script principal
+mkdir -p /TcTI/SCRIPTS/PROXMOX && cd /TcTI/SCRIPTS/PROXMOX && curl -sL -o main.sh https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main/main.sh && chmod +x main.sh && ./main.sh
 ```
+
+O script principal irá baixar automaticamente todos os módulos necessários na primeira execução.
 
 ### Instalação automática na inicialização
 
@@ -363,9 +359,8 @@ SYMBOL_UPDATE="🔄"
 
 ### Script não atualiza
 ```bash
-# Força atualização removendo arquivo local
-rm main.sh
-bash main.sh
+# Força atualização completa
+cd /TcTI/SCRIPTS/PROXMOX && rm -f main.sh && curl -sL -o main.sh https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main/main.sh && chmod +x main.sh && ./main.sh
 ```
 
 ### Auto-start não funciona
@@ -380,10 +375,10 @@ bash functions/pve/menu_instala_script.sh
 ### Erro de permissão
 ```bash
 # Garante execução como root
-sudo bash main.sh
+cd /TcTI/SCRIPTS/PROXMOX && bash main.sh
 
-# Corrige permissões
-chmod +x main.sh functions/**/*.sh
+# Corrige permissões de todos os scripts
+cd /TcTI/SCRIPTS/PROXMOX && find . -name "*.sh" -exec chmod +x {} \;
 ```
 
 ### Erro de dependências
@@ -391,8 +386,8 @@ chmod +x main.sh functions/**/*.sh
 # Atualiza sistema
 apt update && apt upgrade -y
 
-# Instala dependências comuns
-apt install -y curl wget git
+# Instala dependências mínimas
+apt install -y curl
 ```
 
 ## Contribuindo
