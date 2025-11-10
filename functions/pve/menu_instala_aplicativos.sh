@@ -25,7 +25,7 @@ instala_aplicativos_menu(){
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}TacticalRMM - Remote Monitoring & Management${COLOR_RESET}            ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Cloudflare Tunnel - Túnel reverso seguro${COLOR_RESET}               ${COLOR_CYAN}│${COLOR_RESET}"
-	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GRAY}➜  Zabbix Agent${COLOR_RESET} ${COLOR_GRAY}(Em breve)${COLOR_RESET}                        ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Zabbix Agent - Monitoramento de infraestrutura${COLOR_RESET}        ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}4${COLOR_RESET} ${COLOR_GRAY}➜  Outros aplicativos${COLOR_RESET} ${COLOR_GRAY}(Em breve)${COLOR_RESET}                   ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                              ${COLOR_CYAN}│${COLOR_RESET}"
@@ -48,9 +48,7 @@ instala_aplicativos_menu(){
 				   instala_cloudflared_menu
 				   ;;
 				3) clear;
-				   echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Funcionalidade em desenvolvimento...${COLOR_RESET}"
-				   sleep 2
-				   instala_aplicativos_menu
+				   instala_zabbix_menu
 				   ;;
 				4) clear;
 				   echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Funcionalidade em desenvolvimento...${COLOR_RESET}"

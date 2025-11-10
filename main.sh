@@ -42,6 +42,7 @@ REQUIRED_FILES=(
     "$FUNCTIONS_DIR/pve/menu_instala_aplicativos.sh"
     "$FUNCTIONS_DIR/pve/menu_instala_tactical_rmm.sh"
     "$FUNCTIONS_DIR/pve/menu_instala_cloudflared.sh"
+    "$FUNCTIONS_DIR/pve/menu_instala_zabbix.sh"
     # Funções PBS
     "$FUNCTIONS_DIR/pbs/menu_pbs.sh"
     "$FUNCTIONS_DIR/pbs/menu_update_pbs.sh"
