@@ -33,7 +33,7 @@ pve_menu(){
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}7${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Configurações de rede${COLOR_RESET}                                   ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}8${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Comandos e informações úteis${COLOR_RESET}                            ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
-	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar ao menu principal${COLOR_RESET}                               ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar ao menu principal${COLOR_RESET}                                ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}└───────────────────────────────────────────────────────────────┘${COLOR_RESET}"
 	echo ""
