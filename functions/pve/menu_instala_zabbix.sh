@@ -436,7 +436,7 @@ instala_zabbix_menu() {
     if zabbix_check_installed; then
         echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}1 ➜  Instalar/Configurar Zabbix Agent${COLOR_RESET} ${COLOR_GRAY}(já instalado)${COLOR_RESET}      ${COLOR_CYAN}│${COLOR_RESET}"
     else
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalar/Configurar Zabbix Agent${COLOR_RESET}                          ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalar/Configurar Zabbix Agent${COLOR_RESET}                        ${COLOR_CYAN}│${COLOR_RESET}"
     fi
     
     # Opção 2 - Remover (requer instalação)
