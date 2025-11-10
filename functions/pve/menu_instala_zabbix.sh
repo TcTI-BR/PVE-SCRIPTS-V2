@@ -108,7 +108,7 @@ zabbix_install() {
     echo -e "${COLOR_CYAN}${COLOR_BOLD}"
     echo -e "╔═════════════════════════════════════════════════════════════════════╗"
     echo -e "║                                                                     ║"
-    echo -e "║               📊 Instalação do Zabbix Agent                         ║"
+    echo -e "║               📊 Instalação do Zabbix Agent                          ║"
     echo -e "║                                                                     ║"
     echo -e "╚═════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
@@ -130,9 +130,9 @@ zabbix_install() {
     # Seleciona versão do Zabbix
     echo -e "${COLOR_BOLD}Selecione a versão do Zabbix Agent:${COLOR_RESET}"
     echo ""
-    echo -e "  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}8.0 Latest${COLOR_RESET} ${COLOR_GRAY}(Mais recente)${COLOR_RESET}"
-    echo -e "  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.4 LTS${COLOR_RESET}"
-    echo -e "  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.2 LTS${COLOR_RESET}"
+    echo -e "  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}8.0${COLOR_RESET} ${COLOR_GRAY}(PRE-RELEASE)${COLOR_RESET}"
+    echo -e "  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.4${COLOR_RESET}"
+    echo -e "  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.2${COLOR_RESET}"
     echo -e "  ${COLOR_YELLOW}4${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}7.0 LTS${COLOR_RESET}"
     echo -e "  ${COLOR_YELLOW}5${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}6.0 LTS${COLOR_RESET}"
     echo -e "  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Cancelar${COLOR_RESET}"
@@ -434,20 +434,20 @@ instala_zabbix_menu() {
     
     # Opção 1 - Instalar (desabilitada se já instalado)
     if zabbix_check_installed; then
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}1 ➜  Instalar/Configurar Zabbix Agent${COLOR_RESET} ${COLOR_GRAY}(já instalado)${COLOR_RESET}  ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}1 ➜  Instalar/Configurar Zabbix Agent${COLOR_RESET} ${COLOR_GRAY}(já instalado)${COLOR_RESET}      ${COLOR_CYAN}│${COLOR_RESET}"
     else
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalar/Configurar Zabbix Agent${COLOR_RESET}                    ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Instalar/Configurar Zabbix Agent${COLOR_RESET}                          ${COLOR_CYAN}│${COLOR_RESET}"
     fi
     
     # Opção 2 - Remover (requer instalação)
     if zabbix_check_installed; then
         echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Remover Zabbix Agent${COLOR_RESET}                                ${COLOR_CYAN}│${COLOR_RESET}"
     else
-        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}2 ➜  Remover Zabbix Agent${COLOR_RESET} ${COLOR_GRAY}(requer instalação)${COLOR_RESET}          ${COLOR_CYAN}│${COLOR_RESET}"
+        echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_GRAY}2 ➜  Remover Zabbix Agent${COLOR_RESET} ${COLOR_GRAY}(requer instalação)${COLOR_RESET}                ${COLOR_CYAN}│${COLOR_RESET}"
     fi
     
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                              ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                                  ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}└───────────────────────────────────────────────────────────────┘${COLOR_RESET}"
     echo ""
