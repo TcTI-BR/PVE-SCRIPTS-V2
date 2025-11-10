@@ -102,13 +102,40 @@ cloudflared_configure_service() {
     echo -e "${COLOR_YELLOW}${SYMBOL_LOADING} Configurando serviço...${COLOR_RESET}"
     echo ""
     
-    # Instala o serviço com a chave
-    cloudflared service install $TUNNEL_TOKEN
+    # Para o serviço se estiver rodando
+    if cloudflared_check_service; then
+        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Parando serviço existente...${COLOR_RESET}"
+        systemctl stop cloudflared 2>/dev/null
+        systemctl disable cloudflared 2>/dev/null
+    fi
+    
+    # Remove configuração antiga do serviço
+    if [ -f /etc/systemd/system/cloudflared.service ]; then
+        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Removendo configuração anterior...${COLOR_RESET}"
+        rm -f /etc/systemd/system/cloudflared.service
+        systemctl daemon-reload 2>/dev/null
+    fi
+    
+    # Instala o serviço com a nova chave
+    echo -e "${COLOR_BLUE}${SYMBOL_INFO} Instalando nova configuração...${COLOR_RESET}"
+    cloudflared service install $TUNNEL_TOKEN >/dev/null 2>&1
     
     if cloudflared_check_service; then
-        echo ""
-        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Serviço configurado com sucesso!${COLOR_RESET}"
-        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} O túnel iniciará automaticamente no boot.${COLOR_RESET}"
+        # Inicia o serviço
+        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Iniciando serviço...${COLOR_RESET}"
+        systemctl start cloudflared 2>/dev/null
+        sleep 2
+        
+        # Verifica se está rodando
+        if systemctl is-active cloudflared &> /dev/null; then
+            echo ""
+            echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Serviço configurado com sucesso!${COLOR_RESET}"
+            echo -e "${COLOR_GREEN}${SYMBOL_CHECK} O túnel está ativo e iniciará automaticamente no boot.${COLOR_RESET}"
+        else
+            echo ""
+            echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Serviço configurado, mas não está ativo.${COLOR_RESET}"
+            echo -e "${COLOR_YELLOW}${SYMBOL_INFO} Verifique os logs: ${COLOR_WHITE}journalctl -u cloudflared${COLOR_RESET}"
+        fi
     else
         echo ""
         echo -e "${COLOR_RED}${SYMBOL_ERROR} Erro ao configurar o serviço!${COLOR_RESET}"
@@ -149,14 +176,22 @@ cloudflared_remove() {
         
         # Para e desabilita o serviço se estiver rodando
         if cloudflared_check_service; then
+            echo -e "${COLOR_BLUE}${SYMBOL_INFO} Parando serviço...${COLOR_RESET}"
             systemctl stop cloudflared 2>/dev/null
             systemctl disable cloudflared 2>/dev/null
         fi
         
+        # Remove o arquivo de serviço systemd
+        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Removendo configuração do serviço...${COLOR_RESET}"
+        rm -f /etc/systemd/system/cloudflared.service
+        systemctl daemon-reload 2>/dev/null
+        
         # Remove o pacote
-        apt purge cloudflared -y
+        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Removendo pacote...${COLOR_RESET}"
+        apt purge cloudflared -y >/dev/null 2>&1
         
         # Remove o repositório
+        echo -e "${COLOR_BLUE}${SYMBOL_INFO} Removendo repositório...${COLOR_RESET}"
         rm -f /etc/apt/sources.list.d/cloudflared.list
         
         echo ""
