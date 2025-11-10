@@ -88,6 +88,19 @@ trmm_instalar_agente() {
     echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
     echo ""
     
+    # Exibe o comando que será executado
+    echo -e "${COLOR_MAGENTA}${COLOR_BOLD}🔧 Comando que será executado:${COLOR_RESET}"
+    echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo -e "${COLOR_WHITE}./$SCRIPT_NAME install \\${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}\"$MESH_URL\"${COLOR_RESET} \\"
+    echo -e "  ${COLOR_CYAN}\"$API_URL\"${COLOR_RESET} \\"
+    echo -e "  ${COLOR_CYAN}\"$CLIENT_ID\"${COLOR_RESET} \\"
+    echo -e "  ${COLOR_CYAN}\"$SITE_ID\"${COLOR_RESET} \\"
+    echo -e "  ${COLOR_CYAN}\"[AUTH_KEY_OCULTA]\"${COLOR_RESET} \\"
+    echo -e "  ${COLOR_CYAN}\"$AGENT_TYPE\"${COLOR_RESET}"
+    echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo ""
+    
     echo -e "${COLOR_YELLOW}As informações estão corretas?${COLOR_RESET} (${COLOR_GREEN}s${COLOR_RESET}/${COLOR_RED}n${COLOR_RESET})"
     read -p "→ " CONFIRM
     
@@ -95,18 +108,6 @@ trmm_instalar_agente() {
         echo ""
         trmm_preparar_ambiente
         
-        # Exibe o comando que será executado
-        echo -e "${COLOR_MAGENTA}${COLOR_BOLD}🔧 Comando que será executado:${COLOR_RESET}"
-        echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
-        echo -e "${COLOR_WHITE}./$SCRIPT_NAME install \\${COLOR_RESET}"
-        echo -e "  ${COLOR_CYAN}\"$MESH_URL\"${COLOR_RESET} \\"
-        echo -e "  ${COLOR_CYAN}\"$API_URL\"${COLOR_RESET} \\"
-        echo -e "  ${COLOR_CYAN}\"$CLIENT_ID\"${COLOR_RESET} \\"
-        echo -e "  ${COLOR_CYAN}\"$SITE_ID\"${COLOR_RESET} \\"
-        echo -e "  ${COLOR_CYAN}\"[AUTH_KEY_OCULTA]\"${COLOR_RESET} \\"
-        echo -e "  ${COLOR_CYAN}\"$AGENT_TYPE\"${COLOR_RESET}"
-        echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
-        echo ""
         echo -e "${COLOR_YELLOW}${SYMBOL_LOADING} Executando instalação... ${COLOR_GRAY}(Isso pode demorar alguns minutos)${COLOR_RESET}"
         echo ""
         
@@ -159,6 +160,15 @@ trmm_desinstalar_agente() {
     echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
     echo ""
     
+    # Exibe o comando que será executado
+    echo -e "${COLOR_MAGENTA}${COLOR_BOLD}🔧 Comando que será executado:${COLOR_RESET}"
+    echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo -e "${COLOR_WHITE}./$SCRIPT_NAME uninstall \\${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}\"$MESH_FQDN\"${COLOR_RESET} \\"
+    echo -e "  ${COLOR_CYAN}\"$MESH_ID\"${COLOR_RESET}"
+    echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
+    echo ""
+    
     echo -e "${COLOR_RED}${COLOR_BOLD}Confirmar desinstalação?${COLOR_RESET} (${COLOR_GREEN}s${COLOR_RESET}/${COLOR_RED}n${COLOR_RESET})"
     read -p "→ " CONFIRM
     
@@ -166,14 +176,6 @@ trmm_desinstalar_agente() {
         echo ""
         trmm_preparar_ambiente
         
-        # Exibe o comando que será executado
-        echo -e "${COLOR_MAGENTA}${COLOR_BOLD}🔧 Comando que será executado:${COLOR_RESET}"
-        echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
-        echo -e "${COLOR_WHITE}./$SCRIPT_NAME uninstall \\${COLOR_RESET}"
-        echo -e "  ${COLOR_CYAN}\"$MESH_FQDN\"${COLOR_RESET} \\"
-        echo -e "  ${COLOR_CYAN}\"$MESH_ID\"${COLOR_RESET}"
-        echo -e "${COLOR_GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
-        echo ""
         echo -e "${COLOR_YELLOW}${SYMBOL_LOADING} Executando desinstalação...${COLOR_RESET}"
         echo ""
         
