@@ -261,7 +261,7 @@ clear
 echo -e "${COLOR_CYAN}${COLOR_BOLD}"
 echo -e "╔═══════════════════════════════════════════════════════════════════════════════╗"
 echo -e "║                                                                               ║"
-echo -e "║                    ⚠️  AVISO DE RESPONSABILIDADE  ⚠️                           ║"
+echo -e "║                    ⚠️  AVISO DE RESPONSABILIDADE  ⚠️                             ║"
 echo -e "║                                                                               ║"
 echo -e "╠═══════════════════════════════════════════════════════════════════════════════╣"
 echo -e "${COLOR_RESET}"
