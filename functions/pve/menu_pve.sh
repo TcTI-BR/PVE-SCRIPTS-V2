@@ -2,7 +2,7 @@
 
 # Menu principal do Proxmox Virtual Environment
 # Atualizado: V003.R002 - Adicionada opção 9 (Utilização de IA)
-# Data: 2025-11-17 
+# Data: 2025-11-17
 
 pve_menu(){
 	clear
