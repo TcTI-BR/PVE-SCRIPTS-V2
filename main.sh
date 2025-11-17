@@ -3,7 +3,7 @@
 # Script modular para Proxmox VE e PBS
 # Versão: V003.R002
 # Por: Marcelo Machado
-# Atualização: Adicionado menu de IA (opção 9)
+
 
 version=V003.R002
 
