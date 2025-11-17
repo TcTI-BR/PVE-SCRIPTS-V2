@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Script modular para Proxmox VE e PBS
-# Versão: V003.R001
+# Versão: V003.R002
 # Por: Marcelo Machado
+# Atualização: Adicionado menu de IA (opção 9)
 
 version=V003.R002
 
@@ -45,8 +46,8 @@ REQUIRED_FILES=(
     "$FUNCTIONS_DIR/pve/menu_instala_tactical_rmm.sh"
     "$FUNCTIONS_DIR/pve/menu_instala_cloudflared.sh"
     "$FUNCTIONS_DIR/pve/menu_instala_zabbix.sh"
-    # "$FUNCTIONS_DIR/pve/menu_ia.sh"  # Comentado temporariamente - arquivo novo local
-    # "$FUNCTIONS_DIR/pve/openai_key_manager.sh"  # Comentado temporariamente - arquivo novo local
+    "$FUNCTIONS_DIR/pve/menu_ia.sh"
+    "$FUNCTIONS_DIR/pve/openai_key_manager.sh"
     # Funções PBS
     "$FUNCTIONS_DIR/pbs/menu_pbs.sh"
     "$FUNCTIONS_DIR/pbs/menu_update_pbs.sh"
