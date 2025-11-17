@@ -45,8 +45,8 @@ REQUIRED_FILES=(
     "$FUNCTIONS_DIR/pve/menu_instala_tactical_rmm.sh"
     "$FUNCTIONS_DIR/pve/menu_instala_cloudflared.sh"
     "$FUNCTIONS_DIR/pve/menu_instala_zabbix.sh"
-    "$FUNCTIONS_DIR/pve/menu_ia.sh"
-    "$FUNCTIONS_DIR/pve/openai_key_manager.sh"
+    # "$FUNCTIONS_DIR/pve/menu_ia.sh"  # Comentado temporariamente - arquivo novo local
+    # "$FUNCTIONS_DIR/pve/openai_key_manager.sh"  # Comentado temporariamente - arquivo novo local
     # Funções PBS
     "$FUNCTIONS_DIR/pbs/menu_pbs.sh"
     "$FUNCTIONS_DIR/pbs/menu_update_pbs.sh"
