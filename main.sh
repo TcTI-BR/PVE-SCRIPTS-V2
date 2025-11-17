@@ -4,7 +4,7 @@
 # Versão: V003.R001
 # Por: Marcelo Machado
 
-version=V003.R001
+version=V003.R002
 
 # Define o diretório base do script, independentemente de onde é chamado
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
