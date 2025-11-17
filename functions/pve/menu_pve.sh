@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Menu principal do Proxmox Virtual Environment
+# Atualizado: V003.R002 - Adicionada opção 9 (Utilização de IA)
+# Data: 2025-11-17 
 
 pve_menu(){
 	clear
@@ -32,6 +34,7 @@ pve_menu(){
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}6${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Configurações e ajustes${COLOR_RESET}                                 ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}7${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Configurações de rede${COLOR_RESET}                                   ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}8${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Comandos e informações úteis${COLOR_RESET}                            ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}9${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Utilização de IA${COLOR_RESET}                                        ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar ao menu principal${COLOR_RESET}                                ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
@@ -66,10 +69,13 @@ pve_menu(){
 				7) clear;
 				lan_menu
 					;;
-				8) clear;
-				com_menu
-					;;	  
-				0)
+			8) clear;
+			com_menu
+				;;
+			9) clear;
+			ia_menu
+				;;	  
+			0)
 				clear
 				main_menu
 					;;
