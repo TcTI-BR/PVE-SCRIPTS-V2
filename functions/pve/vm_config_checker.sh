@@ -13,6 +13,9 @@ OPENAI_KEY_FILE="/root/.openai_key"
 QEMU_DIR="/etc/pve/qemu-server"
 LXC_DIR="/etc/pve/lxc"
 
+# Debug mode (descomente para ativar logs detalhados)
+# DEBUG_MODE=1
+
 # Função para verificar se a chave OpenAI existe
 check_openai_key() {
 	if [ ! -f "$OPENAI_KEY_FILE" ]; then
@@ -25,23 +28,6 @@ check_openai_key() {
 	return 0
 }
 
-# Função para buscar arquivos de configuração
-find_config_files() {
-	local type=$1
-	local dir=$2
-	local files=()
-	
-	# Busca recursivamente arquivos .conf que seguem o padrão: número.conf
-	while IFS= read -r file; do
-		local basename=$(basename "$file")
-		# Verifica se o nome do arquivo é número.conf (padrão Proxmox)
-		if [[ $basename =~ ^[0-9]+\.conf$ ]]; then
-			files+=("$file")
-		fi
-	done < <(find "$dir" -type f -name "*.conf" 2>/dev/null)
-	
-	echo "${files[@]}"
-}
 
 # Função para enviar para OpenAI API
 analyze_with_openai() {
@@ -187,16 +173,40 @@ vm_config_checker(){
 	fi
 	echo ""
 	
-	# Busca arquivos de VMs
+	# Busca arquivos de VMs (aceita qualquer .conf que tenha números no nome)
 	local vm_files=()
 	if [ $qemu_exists -eq 1 ] && [ $qemu_readable -eq 1 ]; then
-		mapfile -t vm_files < <(find "$QEMU_DIR" -type f -name "*.conf" 2>/dev/null | grep -E '/[0-9]+\.conf$')
+		# Busca recursiva para cobrir diferentes estruturas de diretórios
+		[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Procurando VMs em: $QEMU_DIR${COLOR_RESET}"
+		while IFS= read -r file; do
+			[ -n "$file" ] || continue
+			local basename=$(basename "$file")
+			[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Encontrado: $file (basename: $basename)${COLOR_RESET}"
+			# Aceita arquivos .conf que começam com números (padrão Proxmox)
+			if [[ $basename =~ ^[0-9]+\.conf$ ]]; then
+				vm_files+=("$file")
+				[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] ✓ Adicionado: $file${COLOR_RESET}"
+			fi
+		done < <(find "$QEMU_DIR" -type f -name "*.conf" 2>/dev/null)
+		[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Total de VMs encontradas: ${#vm_files[@]}${COLOR_RESET}"
 	fi
 	
-	# Busca arquivos de Containers
+	# Busca arquivos de Containers (aceita qualquer .conf que tenha números no nome)
 	local ct_files=()
 	if [ $lxc_exists -eq 1 ] && [ $lxc_readable -eq 1 ]; then
-		mapfile -t ct_files < <(find "$LXC_DIR" -type f -name "*.conf" 2>/dev/null | grep -E '/[0-9]+\.conf$')
+		# Busca recursiva para cobrir diferentes estruturas de diretórios
+		[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Procurando Containers em: $LXC_DIR${COLOR_RESET}"
+		while IFS= read -r file; do
+			[ -n "$file" ] || continue
+			local basename=$(basename "$file")
+			[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Encontrado: $file (basename: $basename)${COLOR_RESET}"
+			# Aceita arquivos .conf que começam com números (padrão Proxmox)
+			if [[ $basename =~ ^[0-9]+\.conf$ ]]; then
+				ct_files+=("$file")
+				[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] ✓ Adicionado: $file${COLOR_RESET}"
+			fi
+		done < <(find "$LXC_DIR" -type f -name "*.conf" 2>/dev/null)
+		[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Total de Containers encontrados: ${#ct_files[@]}${COLOR_RESET}"
 	fi
 	
 	local total_vms=${#vm_files[@]}
