@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Menu de Utilização de IA
-# Versão: V003.R003
+# Versão: V003.R004
 # Adicionado em: 2025-11-17
 # Atualizado em: 2025-11-18
+# Melhorias: Corrigido problema com filesystem FUSE do Proxmox
 
 ia_menu(){
 	clear

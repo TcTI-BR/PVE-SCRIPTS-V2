@@ -1,10 +1,13 @@
 #!/bin/bash
 
 # Verificador de Configurações de VMs e Containers usando IA
-# Versão: V003.R003
+# Versão: V003.R004
 # Adicionado em: 2025-11-17
 # Atualizado em: 2025-11-18
-# Melhorias: Diagnóstico detalhado de diretórios e melhor tratamento de erros 
+# Melhorias: 
+#   - Diagnóstico detalhado de diretórios e melhor tratamento de erros
+#   - Substituído 'find' por 'glob patterns' (compatível com FUSE filesystem do Proxmox)
+#   - Adicionado modo DEBUG para diagnóstico 
 
 # Arquivo onde a chave está armazenada
 OPENAI_KEY_FILE="/root/.openai_key"
@@ -173,39 +176,49 @@ vm_config_checker(){
 	fi
 	echo ""
 	
-	# Busca arquivos de VMs (aceita qualquer .conf que tenha números no nome)
+	# Busca arquivos de VMs usando glob (mais compatível com /etc/pve/ FUSE filesystem)
 	local vm_files=()
 	if [ $qemu_exists -eq 1 ] && [ $qemu_readable -eq 1 ]; then
-		# Busca recursiva para cobrir diferentes estruturas de diretórios
 		[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Procurando VMs em: $QEMU_DIR${COLOR_RESET}"
-		while IFS= read -r file; do
-			[ -n "$file" ] || continue
+		
+		# Usa glob pattern que funciona melhor com filesystem FUSE do Proxmox
+		shopt -s nullglob  # Evita retornar o pattern literal se não houver matches
+		for file in "$QEMU_DIR"/*.conf "$QEMU_DIR"/*/*.conf; do
+			[ -f "$file" ] || continue
 			local basename=$(basename "$file")
 			[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Encontrado: $file (basename: $basename)${COLOR_RESET}"
+			
 			# Aceita arquivos .conf que começam com números (padrão Proxmox)
 			if [[ $basename =~ ^[0-9]+\.conf$ ]]; then
 				vm_files+=("$file")
 				[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] ✓ Adicionado: $file${COLOR_RESET}"
 			fi
-		done < <(find "$QEMU_DIR" -type f -name "*.conf" 2>/dev/null)
+		done
+		shopt -u nullglob
+		
 		[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Total de VMs encontradas: ${#vm_files[@]}${COLOR_RESET}"
 	fi
 	
-	# Busca arquivos de Containers (aceita qualquer .conf que tenha números no nome)
+	# Busca arquivos de Containers usando glob (mais compatível com /etc/pve/ FUSE filesystem)
 	local ct_files=()
 	if [ $lxc_exists -eq 1 ] && [ $lxc_readable -eq 1 ]; then
-		# Busca recursiva para cobrir diferentes estruturas de diretórios
 		[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Procurando Containers em: $LXC_DIR${COLOR_RESET}"
-		while IFS= read -r file; do
-			[ -n "$file" ] || continue
+		
+		# Usa glob pattern que funciona melhor com filesystem FUSE do Proxmox
+		shopt -s nullglob  # Evita retornar o pattern literal se não houver matches
+		for file in "$LXC_DIR"/*.conf "$LXC_DIR"/*/*.conf; do
+			[ -f "$file" ] || continue
 			local basename=$(basename "$file")
 			[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Encontrado: $file (basename: $basename)${COLOR_RESET}"
+			
 			# Aceita arquivos .conf que começam com números (padrão Proxmox)
 			if [[ $basename =~ ^[0-9]+\.conf$ ]]; then
 				ct_files+=("$file")
 				[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] ✓ Adicionado: $file${COLOR_RESET}"
 			fi
-		done < <(find "$LXC_DIR" -type f -name "*.conf" 2>/dev/null)
+		done
+		shopt -u nullglob
+		
 		[ -n "$DEBUG_MODE" ] && echo -e "${COLOR_GRAY}  [DEBUG] Total de Containers encontrados: ${#ct_files[@]}${COLOR_RESET}"
 	fi
 	
@@ -398,31 +411,49 @@ vm_config_checker(){
 				return
 			fi
 			
-			# Busca o arquivo
+			# Busca o arquivo usando glob (compatível com FUSE filesystem)
 			local found=0
 			local config_file=""
 			local type=""
 			
-			# Verifica se é VM
+			# Verifica se é VM (primeiro no diretório raiz, depois em subdiretórios)
 			if [ -f "$QEMU_DIR/${target_id}.conf" ]; then
 				config_file="$QEMU_DIR/${target_id}.conf"
 				type="VM"
 				found=1
-			# Verifica em subpastas
-			elif [ -n "$(find "$QEMU_DIR" -name "${target_id}.conf" 2>/dev/null)" ]; then
-				config_file=$(find "$QEMU_DIR" -name "${target_id}.conf" 2>/dev/null | head -n1)
-				type="VM"
-				found=1
-			# Verifica se é Container
-			elif [ -f "$LXC_DIR/${target_id}.conf" ]; then
-				config_file="$LXC_DIR/${target_id}.conf"
-				type="Container"
-				found=1
-			# Verifica em subpastas
-			elif [ -n "$(find "$LXC_DIR" -name "${target_id}.conf" 2>/dev/null)" ]; then
-				config_file=$(find "$LXC_DIR" -name "${target_id}.conf" 2>/dev/null | head -n1)
-				type="Container"
-				found=1
+			else
+				# Verifica em subpastas usando glob
+				shopt -s nullglob
+				for file in "$QEMU_DIR"/*/"${target_id}.conf" "$QEMU_DIR"/*/*/"${target_id}.conf"; do
+					if [ -f "$file" ]; then
+						config_file="$file"
+						type="VM"
+						found=1
+						break
+					fi
+				done
+				shopt -u nullglob
+			fi
+			
+			# Se não encontrou como VM, verifica se é Container
+			if [ $found -eq 0 ]; then
+				if [ -f "$LXC_DIR/${target_id}.conf" ]; then
+					config_file="$LXC_DIR/${target_id}.conf"
+					type="Container"
+					found=1
+				else
+					# Verifica em subpastas usando glob
+					shopt -s nullglob
+					for file in "$LXC_DIR"/*/"${target_id}.conf" "$LXC_DIR"/*/*/"${target_id}.conf"; do
+						if [ -f "$file" ]; then
+							config_file="$file"
+							type="Container"
+							found=1
+							break
+						fi
+					done
+					shopt -u nullglob
+				fi
 			fi
 			
 			if [ $found -eq 0 ]; then
