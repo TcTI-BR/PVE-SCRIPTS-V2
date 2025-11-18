@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # Verificador de Configurações de VMs e Containers usando IA
-# Versão: V003.R002
-# Adicionado em: 2025-11-17 
+# Versão: V003.R003
+# Adicionado em: 2025-11-17
+# Atualizado em: 2025-11-18
+# Melhorias: Diagnóstico detalhado de diretórios e melhor tratamento de erros 
 
 # Arquivo onde a chave está armazenada
 OPENAI_KEY_FILE="/root/.openai_key"
@@ -142,15 +144,58 @@ vm_config_checker(){
 	echo -e "${COLOR_YELLOW}  🔎 Buscando VMs e Containers...${COLOR_RESET}"
 	echo ""
 	
+	# Verificação de ambiente e diretórios
+	local qemu_exists=0
+	local lxc_exists=0
+	local qemu_readable=0
+	local lxc_readable=0
+	
+	if [ -d "$QEMU_DIR" ]; then
+		qemu_exists=1
+		if [ -r "$QEMU_DIR" ]; then
+			qemu_readable=1
+		fi
+	fi
+	
+	if [ -d "$LXC_DIR" ]; then
+		lxc_exists=1
+		if [ -r "$LXC_DIR" ]; then
+			lxc_readable=1
+		fi
+	fi
+	
+	# Debug: Mostra status dos diretórios
+	echo -e "${COLOR_CYAN}  📁 Status dos diretórios:${COLOR_RESET}"
+	if [ $qemu_exists -eq 1 ]; then
+		if [ $qemu_readable -eq 1 ]; then
+			echo -e "    ${COLOR_GREEN}✓${COLOR_RESET} ${COLOR_WHITE}VMs:${COLOR_RESET} ${QEMU_DIR} ${COLOR_GREEN}(acessível)${COLOR_RESET}"
+		else
+			echo -e "    ${COLOR_RED}✗${COLOR_RESET} ${COLOR_WHITE}VMs:${COLOR_RESET} ${QEMU_DIR} ${COLOR_RED}(sem permissão)${COLOR_RESET}"
+		fi
+	else
+		echo -e "    ${COLOR_RED}✗${COLOR_RESET} ${COLOR_WHITE}VMs:${COLOR_RESET} ${QEMU_DIR} ${COLOR_RED}(não existe)${COLOR_RESET}"
+	fi
+	
+	if [ $lxc_exists -eq 1 ]; then
+		if [ $lxc_readable -eq 1 ]; then
+			echo -e "    ${COLOR_GREEN}✓${COLOR_RESET} ${COLOR_WHITE}Containers:${COLOR_RESET} ${LXC_DIR} ${COLOR_GREEN}(acessível)${COLOR_RESET}"
+		else
+			echo -e "    ${COLOR_RED}✗${COLOR_RESET} ${COLOR_WHITE}Containers:${COLOR_RESET} ${LXC_DIR} ${COLOR_RED}(sem permissão)${COLOR_RESET}"
+		fi
+	else
+		echo -e "    ${COLOR_RED}✗${COLOR_RESET} ${COLOR_WHITE}Containers:${COLOR_RESET} ${LXC_DIR} ${COLOR_RED}(não existe)${COLOR_RESET}"
+	fi
+	echo ""
+	
 	# Busca arquivos de VMs
 	local vm_files=()
-	if [ -d "$QEMU_DIR" ]; then
+	if [ $qemu_exists -eq 1 ] && [ $qemu_readable -eq 1 ]; then
 		mapfile -t vm_files < <(find "$QEMU_DIR" -type f -name "*.conf" 2>/dev/null | grep -E '/[0-9]+\.conf$')
 	fi
 	
 	# Busca arquivos de Containers
 	local ct_files=()
-	if [ -d "$LXC_DIR" ]; then
+	if [ $lxc_exists -eq 1 ] && [ $lxc_readable -eq 1 ]; then
 		mapfile -t ct_files < <(find "$LXC_DIR" -type f -name "*.conf" 2>/dev/null | grep -E '/[0-9]+\.conf$')
 	fi
 	
@@ -160,6 +205,30 @@ vm_config_checker(){
 	
 	if [ $total -eq 0 ]; then
 		echo -e "${COLOR_RED}  ✗ Nenhuma VM ou Container encontrado${COLOR_RESET}"
+		echo ""
+		
+		# Diagnóstico adicional
+		if [ $qemu_exists -eq 0 ] && [ $lxc_exists -eq 0 ]; then
+			echo -e "${COLOR_YELLOW}  💡 Possíveis causas:${COLOR_RESET}"
+			echo -e "    ${COLOR_WHITE}• Não está num servidor Proxmox VE${COLOR_RESET}"
+			echo -e "    ${COLOR_WHITE}• O filesystem /etc/pve/ não está montado${COLOR_RESET}"
+			echo ""
+			echo -e "${COLOR_CYAN}  🔧 Comandos de diagnóstico:${COLOR_RESET}"
+			echo -e "    ${COLOR_GRAY}pvesh get /version${COLOR_RESET}"
+			echo -e "    ${COLOR_GRAY}pvesm status${COLOR_RESET}"
+			echo -e "    ${COLOR_GRAY}mount | grep pve${COLOR_RESET}"
+		elif [ $qemu_readable -eq 0 ] || [ $lxc_readable -eq 0 ]; then
+			echo -e "${COLOR_YELLOW}  💡 Possível causa:${COLOR_RESET}"
+			echo -e "    ${COLOR_WHITE}• Sem permissões de acesso aos diretórios${COLOR_RESET}"
+			echo ""
+			echo -e "${COLOR_CYAN}  🔧 Solução:${COLOR_RESET}"
+			echo -e "    ${COLOR_GRAY}Execute o script como root ou com sudo${COLOR_RESET}"
+		else
+			echo -e "${COLOR_YELLOW}  💡 Informação:${COLOR_RESET}"
+			echo -e "    ${COLOR_WHITE}• Os diretórios existem mas não há VMs/Containers configurados${COLOR_RESET}"
+			echo -e "    ${COLOR_WHITE}• Crie VMs ou Containers primeiro no Proxmox${COLOR_RESET}"
+		fi
+		
 		echo ""
 		read -p "  Pressione ENTER para voltar..."
 		return

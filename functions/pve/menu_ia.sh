@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Menu de Utilização de IA
-# Versão: V003.R002
+# Versão: V003.R003
 # Adicionado em: 2025-11-17
+# Atualizado em: 2025-11-18
 
 ia_menu(){
 	clear
