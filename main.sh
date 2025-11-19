@@ -31,6 +31,7 @@ REQUIRED_FILES=(
     "$FUNCTIONS_DIR/pve/menu_update.sh"
     "$FUNCTIONS_DIR/pve/menu_upgrade.sh"
     "$FUNCTIONS_DIR/pve/menu_disco.sh"
+    "$FUNCTIONS_DIR/pve/menu_ceph.sh"
     "$FUNCTIONS_DIR/pve/menu_bkp.sh"
     "$FUNCTIONS_DIR/pve/menu_email.sh"
     "$FUNCTIONS_DIR/pve/menu_vm_operations.sh"

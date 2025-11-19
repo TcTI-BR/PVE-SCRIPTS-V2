@@ -100,7 +100,40 @@ disco_menu(){
 		disco_menu
 			;;
 		6) clear
-		ceph_menu
+		# Carregar menu_ceph.sh se ainda não foi carregado
+		if ! type ceph_menu &>/dev/null; then
+			# Tentar vários caminhos possíveis
+			local ceph_script=""
+			if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/functions/pve/menu_ceph.sh" ]; then
+				ceph_script="$SCRIPT_DIR/functions/pve/menu_ceph.sh"
+			elif [ -n "$FUNCTIONS_DIR" ] && [ -f "$FUNCTIONS_DIR/pve/menu_ceph.sh" ]; then
+				ceph_script="$FUNCTIONS_DIR/pve/menu_ceph.sh"
+			elif [ -f "$(dirname "${BASH_SOURCE[0]}")/menu_ceph.sh" ]; then
+				ceph_script="$(dirname "${BASH_SOURCE[0]}")/menu_ceph.sh"
+			elif [ -f "/TcTI/SCRIPTS/PROXMOX/functions/pve/menu_ceph.sh" ]; then
+				ceph_script="/TcTI/SCRIPTS/PROXMOX/functions/pve/menu_ceph.sh"
+			elif [ -f "functions/pve/menu_ceph.sh" ]; then
+				ceph_script="functions/pve/menu_ceph.sh"
+			fi
+			
+			if [ -n "$ceph_script" ] && [ -f "$ceph_script" ]; then
+				source "$ceph_script"
+			fi
+		fi
+		
+		if type ceph_menu &>/dev/null; then
+			ceph_menu
+		else
+			echo -e "${COLOR_RED}${COLOR_BOLD}✗ ERRO: Função ceph_menu não encontrada${COLOR_RESET}"
+			echo ""
+			echo -e "${COLOR_YELLOW}O arquivo menu_ceph.sh não foi carregado corretamente.${COLOR_RESET}"
+			echo -e "${COLOR_YELLOW}Verifique se o arquivo existe em:${COLOR_RESET}"
+			echo -e "${COLOR_GRAY}  - functions/pve/menu_ceph.sh${COLOR_RESET}"
+			echo -e "${COLOR_GRAY}  - /TcTI/SCRIPTS/PROXMOX/functions/pve/menu_ceph.sh${COLOR_RESET}"
+			echo ""
+			read -p "Pressione uma tecla para continuar..."
+			disco_menu
+		fi
 			;;			
 		0) clear;
 		pve_menu;
