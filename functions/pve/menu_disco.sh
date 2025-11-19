@@ -14,7 +14,7 @@ disco_menu(){
 	echo -e "${COLOR_CYAN}${COLOR_BOLD}"
 	echo -e "╔═════════════════════════════════════════════════════════════════════╗"
 	echo -e "║                                                                     ║"
-	echo -e "║                    💾 Ferramentas de Disco                           ║"
+	echo -e "║          💾 Ferramentas de Disco e Sistemas de Arquivos              ║"
 	echo -e "║                                                                     ║"
 	echo -e "╚═════════════════════════════════════════════════════════════════════╝"
 	echo -e "${COLOR_RESET}"
@@ -28,6 +28,7 @@ disco_menu(){
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Verifica setores defeituosos em discos${COLOR_RESET}                  ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}4${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Verifica o SMART do disco${COLOR_RESET}                               ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}5${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Remove o storage local-lvm${COLOR_RESET}                              ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}6${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Ceph Utils - Gerenciamento de Cluster Ceph${COLOR_RESET}              ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Voltar${COLOR_RESET}                                                  ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
@@ -97,6 +98,9 @@ disco_menu(){
 		pvesm remove local-lvm
 		read -p "Pressione uma tecla para continuar..."
 		disco_menu
+			;;
+		6) clear
+		ceph_menu
 			;;			
 		0) clear;
 		pve_menu;
