@@ -27,7 +27,7 @@ pve_menu(){
 	echo -e "  ${COLOR_CYAN}┌───────────────────────────────────────────────────────────────┐${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                               ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Atualização, instalação e upgrade do sistema${COLOR_RESET}            ${COLOR_CYAN}│${COLOR_RESET}"
-	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Ferramentas de disco e sistemas de arquivos${COLOR_RESET}            ${COLOR_CYAN}│${COLOR_RESET}"
+	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Ferramentas de disco e sistemas de arquivos${COLOR_RESET}             ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Tarefas de backup${COLOR_RESET}                                       ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}4${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Configuração do email${COLOR_RESET}                                   ${COLOR_CYAN}│${COLOR_RESET}"
 	echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}5${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Operações de VMs${COLOR_RESET}                                        ${COLOR_CYAN}│${COLOR_RESET}"
