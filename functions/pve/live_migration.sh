@@ -193,13 +193,132 @@ live_migration_menu(){
         done
     }
 
+    # Nova Função: Migração em Lote (Bulk)
+    function start_bulk_migration() {
+        echo -e "\n${MIG_BLUE_HEADER}--- CONFIGURAR MIGRAÇÃO EM LOTE (BULK) ---${MIG_NC}"
+        read -p "Digite o IP do servidor de DESTINO: " DEST_IP
+        read -p "Digite o USUÁRIO do servidor de DESTINO (Enter para 'root'): " DEST_USER
+        if [ -z "$DEST_USER" ]; then
+            DEST_USER="root"
+            echo "Usuário definido como 'root'."
+        fi
+        read -sp "Digite a SENHA do servidor de DESTINO: " DEST_PASS; echo ""
+
+        echo "Conectando em $DEST_IP para obter informações de certificado e storage..."
+        local CRED_CMD="openssl x509 -in /etc/pve/local/pve-ssl.pem -fingerprint -sha256 -noout"
+        local CRED_OUTPUT=$(sshpass -p "$DEST_PASS" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 "$DEST_USER@$DEST_IP" "$CRED_CMD" 2>&1)
+        local FINGERPRINT=$(echo "$CRED_OUTPUT" | grep 'Fingerprint=' | sed -E 's/.*fingerprint=//i')
+
+        local STORAGE_CMD="pvesm status"
+        local STORAGE_OUTPUT=$(sshpass -p "$DEST_PASS" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 "$DEST_USER@$DEST_IP" "$STORAGE_CMD" 2>&1)
+        local DEST_STORAGES=$(echo "$STORAGE_OUTPUT" | tail -n +2 | grep ' active ' | awk '{print $1}')
+
+        if [ -z "$FINGERPRINT" ] || [ -z "$DEST_STORAGES" ]; then
+            echo -e "${MIG_RED}ERRO: Falha ao obter informações do servidor de destino.${MIG_NC}"
+            read -p "Pressione Enter para continuar..."; return
+        fi
+
+        clear
+        display_migration_status
+        echo -e "\n${MIG_BLUE_HEADER}--- Seleção de VMs para Migração em Lote ---${MIG_NC}"
+        
+        local migrating_vms=$(awk '{print $1}' "$MIG_PID_LOG_FILE")
+        echo -e "\n${MIG_BLUE_HEADER}VMs disponíveis neste servidor:${MIG_NC}"
+        
+        qm list | tail -n +2 | while read -r VMID NAME STATUS LOCK BOOT; do
+            if [[ " ${migrating_vms[*]} " =~ " ${VMID} " ]]; then
+                echo -e "${MIG_RED}$VMID - $NAME (Status: $STATUS) - EM MIGRAÇÃO${MIG_NC}"
+            elif [[ "$STATUS" == "stopped" ]]; then
+                echo -e "${MIG_BLUE_VM}$VMID - $NAME (Status: $STATUS)${MIG_NC}"
+            else
+                echo -e "${MIG_GREEN}$VMID - $NAME (Status: $STATUS)${MIG_NC}"
+            fi
+        done
+        
+        # Pega todos os IDs válidos locais para caso o usuário digite 'ALL'
+        local all_local_vms=$(qm list | tail -n +2 | awk '{print $1}')
+
+        echo ""
+        read -p "Digite os IDs separados por espaço (ex: 100 101) ou 'ALL' para todas (ou 'q' para voltar): " BULK_INPUT
+        
+        if [[ "$BULK_INPUT" == "q" || "$BULK_INPUT" == "Q" ]]; then return; fi
+
+        local SELECTED_VMS=()
+        if [[ "$BULK_INPUT" == "ALL" || "$BULK_INPUT" == "all" ]]; then
+            SELECTED_VMS=($all_local_vms)
+        else
+            SELECTED_VMS=($BULK_INPUT)
+        fi
+
+        if [ ${#SELECTED_VMS[@]} -eq 0 ]; then
+            echo -e "${MIG_RED}Nenhuma VM válida selecionada.${MIG_NC}"; sleep 2; return
+        fi
+
+        echo -e "\n${MIG_BLUE_HEADER}Storages disponíveis em $DEST_IP:${MIG_NC}"; echo "$DEST_STORAGES"
+        read -p "Digite o nome do Storage de DESTINO para TODAS as VMs selecionadas: " DEST_STORAGE
+        
+        if ! echo "$DEST_STORAGES" | grep -wq "$DEST_STORAGE"; then
+            echo -e "${MIG_RED}Storage '$DEST_STORAGE' não encontrado no destino! Operação cancelada.${MIG_NC}"; sleep 2; return
+        fi
+
+        local DEST_PASS_B64=$(echo -n "$DEST_PASS" | base64)
+
+        echo -e "\n${MIG_BLUE_HEADER}Iniciando migrações em lote...${MIG_NC}"
+        
+        for SOURCE_VMID in "${SELECTED_VMS[@]}"; do
+            # Validações antes de iniciar
+            if [[ " ${migrating_vms[*]} " =~ " ${SOURCE_VMID} " ]]; then
+                echo -e "${MIG_YELLOW}Ignorando VM $SOURCE_VMID: Já está em processo de migração!${MIG_NC}"
+                continue
+            fi
+            
+            if ! qm status "$SOURCE_VMID" &>/dev/null; then
+                echo -e "${MIG_RED}Ignorando VM $SOURCE_VMID: Não encontrada no servidor local!${MIG_NC}"
+                continue
+            fi
+
+            # Gera um token específico para esta VM para não conflitar na hora do cleanup
+            local TOKEN_ID="migrabulk-${SOURCE_VMID}-$(date +%s)"
+            local TOKEN_CMD="pveum user token add $DEST_USER@pam $TOKEN_ID --privsep 0"
+            local TOKEN_OUTPUT=$(sshpass -p "$DEST_PASS" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 "$DEST_USER@$DEST_IP" "$TOKEN_CMD" 2>&1)
+            local TOKEN_SECRET=$(echo "$TOKEN_OUTPUT" | grep -oP '[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}')
+
+            if [ -z "$TOKEN_SECRET" ]; then
+                echo -e "${MIG_RED}Falha ao gerar token para VM $SOURCE_VMID. Pulando para a próxima...${MIG_NC}"
+                continue
+            fi
+
+            local API_TOKEN="PVEAPIToken=$DEST_USER@pam!$TOKEN_ID=$TOKEN_SECRET"
+            local TARGET_ENDPOINT="apitoken=$API_TOKEN,host=$DEST_IP,fingerprint=$FINGERPRINT"
+            local TARGET_VMID=$SOURCE_VMID # O ID no destino será igual ao de origem no bulk
+            local TASK_LOG_FILE="$MIG_TASK_LOG_DIR/vm-${SOURCE_VMID}-task.log"
+            
+            echo -e "Enviando VM ${MIG_YELLOW}$SOURCE_VMID${MIG_NC} para storage ${MIG_YELLOW}$DEST_STORAGE${MIG_NC}..."
+            
+            # Executa a migração em background
+            qm remote-migrate "$SOURCE_VMID" "$TARGET_VMID" "$TARGET_ENDPOINT" --target-bridge vmbr0 --target-storage "$DEST_STORAGE" --online < /dev/null > "$TASK_LOG_FILE" 2>&1 &
+            local MIGRATE_PID=$!
+
+            # Registra no log para a função de status
+            echo "$SOURCE_VMID $MIGRATE_PID $TASK_LOG_FILE $TOKEN_ID $DEST_IP $DEST_USER $DEST_PASS_B64" >> "$MIG_PID_LOG_FILE"
+            echo -e "${MIG_GREEN}VM $SOURCE_VMID: Migração iniciada (PID $MIGRATE_PID).${MIG_NC}"
+            
+            # Pequeno delay para não sobrecarregar as requisições iniciais da API
+            sleep 1 
+        done
+
+        echo -e "\n${MIG_GREEN}Processo de migração em lote disparado com sucesso!${MIG_NC}"
+        read -p "Pressione Enter para voltar ao menu principal..."
+    }
+
     # --- Loop Principal do Menu ---
     while true; do
         clear
         display_migration_status
         echo -e "\n${MIG_BLUE_HEADER}-----------------------------------------${MIG_NC}"
-        echo "1. Iniciar Nova Migração de VM"
-        echo "2. Apenas Atualizar Status"
+        echo "1. Iniciar Nova Migração de VM (Única)"
+        echo "2. Iniciar Migração em Lote (Bulk)"
+        echo "3. Apenas Atualizar Status"
         echo "0. Voltar"
         echo -e "${MIG_BLUE_HEADER}-----------------------------------------${MIG_NC}"
         read -p "Escolha uma opção: " choice
@@ -209,6 +328,9 @@ live_migration_menu(){
                 start_new_migration
                 ;;
             2)
+                start_bulk_migration
+                ;;
+            3)
                 ;;
             0)
                 vm_operations_menu
@@ -221,4 +343,3 @@ live_migration_menu(){
         esac
     done
 }
-
