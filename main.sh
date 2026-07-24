@@ -22,45 +22,7 @@ FUNCTIONS_DIR="$SCRIPT_DIR/functions"
 # Timestamp para forçar bypass de cache (cache busting)
 CACHE_BUSTER="?t=$(date +%s%N)"
 
-# Lista de arquivos necessários (nova estrutura modular)
-REQUIRED_FILES=(
-    # Script Principal
-    "$SCRIPT_DIR/main.sh"
-    # Funções PVE
-    "$FUNCTIONS_DIR/pve/menu_pve.sh"
-    "$FUNCTIONS_DIR/pve/menu_update.sh"
-    "$FUNCTIONS_DIR/pve/menu_upgrade.sh"
-    "$FUNCTIONS_DIR/pve/menu_disco.sh"
-    "$FUNCTIONS_DIR/pve/menu_ceph.sh"
-    "$FUNCTIONS_DIR/pve/menu_bkp.sh"
-    "$FUNCTIONS_DIR/pve/menu_email.sh"
-    "$FUNCTIONS_DIR/pve/menu_vm_operations.sh"
-    "$FUNCTIONS_DIR/pve/live_migration.sh"
-    "$FUNCTIONS_DIR/pve/menu_tweaks.sh"
-    "$FUNCTIONS_DIR/pve/destranca_desliga.sh"
-    "$FUNCTIONS_DIR/pve/menu_instala_script.sh"
-    "$FUNCTIONS_DIR/pve/menu_instala_x.sh"
-    "$FUNCTIONS_DIR/pve/menu_watch_dog.sh"
-    "$FUNCTIONS_DIR/pve/menu_lan.sh"
-    "$FUNCTIONS_DIR/pve/menu_commands.sh"
-    "$FUNCTIONS_DIR/pve/menu_instala_aplicativos.sh"
-    "$FUNCTIONS_DIR/pve/menu_instala_tactical_rmm.sh"
-    "$FUNCTIONS_DIR/pve/menu_instala_cloudflared.sh"
-    "$FUNCTIONS_DIR/pve/menu_instala_zabbix.sh"
-    "$FUNCTIONS_DIR/pve/menu_ia.sh"
-    "$FUNCTIONS_DIR/pve/openai_key_manager.sh"
-    "$FUNCTIONS_DIR/pve/vm_config_checker.sh"
-    "$FUNCTIONS_DIR/pve/menu_telegram.sh"
-    # Funções PBS
-    "$FUNCTIONS_DIR/pbs/menu_pbs.sh"
-    "$FUNCTIONS_DIR/pbs/menu_update_pbs.sh"
-    "$FUNCTIONS_DIR/pbs/menu_upgrade_pbs.sh"
-    "$FUNCTIONS_DIR/pbs/menu_disco_pbs.sh"
-    "$FUNCTIONS_DIR/pbs/menu_email_pbs.sh"
-    "$FUNCTIONS_DIR/pbs/menu_lan_pbs.sh"
-    "$FUNCTIONS_DIR/pbs/menu_tweaks_pbs.sh"
-)
-
+# Lista de arquivos não é mais necessária pois usaremos o tar.gz
 # Cores modernas
 COLOR_RESET="\033[0m"
 COLOR_BOLD="\033[1m"
@@ -93,138 +55,91 @@ run_updater() {
     
     mkdir -p "$FUNCTIONS_DIR/pve"
     mkdir -p "$FUNCTIONS_DIR/pbs"
+    mkdir -p "$FUNCTIONS_DIR/extras"
     
-    local total_files=${#REQUIRED_FILES[@]}
-    local current=0
-    local new_count=0
-    local updated_count=0
-    local ok_count=0
-    local error_count=0
-    local main_updated=0
+    echo -e "${COLOR_BLUE}${SYMBOL_LOADING} Verificando conexão com a internet...${COLOR_RESET}"
     
-    echo -e "${COLOR_BLUE}${SYMBOL_LOADING} Verificando ${total_files} arquivos...${COLOR_RESET}\n"
+    # Teste rápido de conexão
+    if ! curl -s --connect-timeout 3 https://github.com > /dev/null; then
+        echo -e "${COLOR_YELLOW}⚠️  Modo Offline: Sem conexão. Iniciando com a versão local.${COLOR_RESET}"
+        sleep 2
+        return 0
+    fi
     
-    for FILE_PATH in "${REQUIRED_FILES[@]}"; do
-        current=$((current + 1))
+    echo -e "${COLOR_BLUE}${SYMBOL_LOADING} Buscando atualizações...${COLOR_RESET}"
+    
+    # Obtém o ID do último commit na branch main (evita rate limits e é super rápido)
+    LATEST_COMMIT=$(curl -sL "https://github.com/TcTI-BR/PVE-SCRIPTS-V2/commits/main.atom" | grep -m 1 "<id>tag:github.com,2008:Grit::Commit/" | cut -d '/' -f 2)
+    
+    if [ -z "$LATEST_COMMIT" ]; then
+        echo -e "${COLOR_RED}${SYMBOL_ERROR} Falha ao consultar o repositório. Iniciando versão local.${COLOR_RESET}"
+        sleep 2
+        return 0
+    fi
+    
+    LOCAL_COMMIT_FILE="$SCRIPT_DIR/.local_version"
+    LOCAL_COMMIT=""
+    
+    if [ -f "$LOCAL_COMMIT_FILE" ]; then
+        LOCAL_COMMIT=$(cat "$LOCAL_COMMIT_FILE")
+    fi
+    
+    if [ "$LATEST_COMMIT" == "$LOCAL_COMMIT" ]; then
+        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} O script já está na última versão!${COLOR_RESET}"
+        sleep 1
+        return 0
+    fi
+    
+    echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} Nova versão detectada! Baixando atualização (tar.gz)...${COLOR_RESET}"
+    
+    TMP_DIR="/tmp/pve_scripts_update_$$"
+    mkdir -p "$TMP_DIR"
+    
+    TAR_URL="https://github.com/TcTI-BR/PVE-SCRIPTS-V2/archive/refs/heads/main.tar.gz"
+    
+    if curl -sL "$TAR_URL" | tar -xz -C "$TMP_DIR"; then
+        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Download e extração concluídos.${COLOR_RESET}"
         
-        # Extrai o caminho relativo (ex: functions/pve/arquivo.sh ou main.sh)
-        RELATIVE_PATH="${FILE_PATH#"$SCRIPT_DIR/"}"
-        REMOTE_URL="$BASE_URL/$RELATIVE_PATH$CACHE_BUSTER"
-        TMP_FILE="/tmp/$(basename "$FILE_PATH").remote.$$"
-        
-        # Nome do arquivo para exibição
-        FILE_NAME=$(basename "$FILE_PATH")
-        
-        # Exibe progresso
-        printf "${COLOR_GRAY}[%2d/${total_files}]${COLOR_RESET} %-40s " "$current" "$FILE_NAME"
-        
-        # Baixa com flags para evitar cache
-        if ! curl -sL -H "Cache-Control: no-cache, no-store, must-revalidate" \
-                    -H "Pragma: no-cache" \
-                    -H "Expires: 0" \
-                    -o "$TMP_FILE" "$REMOTE_URL" 2>/dev/null; then
-            echo -e "${COLOR_RED}${SYMBOL_ERROR} Erro ao baixar${COLOR_RESET}"
-            error_count=$((error_count + 1))
-            continue
-        fi
-        
-        # Verifica se o arquivo foi baixado corretamente
-        if [ ! -s "$TMP_FILE" ]; then
-            echo -e "${COLOR_RED}${SYMBOL_ERROR} Arquivo vazio${COLOR_RESET}"
-            rm -f "$TMP_FILE"
-            error_count=$((error_count + 1))
-            continue
-        fi
-        
-        if [ ! -f "$FILE_PATH" ]; then
-            # Arquivo não existe - instalar
-            mv "$TMP_FILE" "$FILE_PATH"
-            chmod +x "$FILE_PATH"
-            echo -e "${COLOR_MAGENTA}${SYMBOL_NEW} NOVO${COLOR_RESET}"
-            new_count=$((new_count + 1))
+        # O GitHub extrai para uma pasta (ex: PVE-SCRIPTS-V2-main), enquanto um .tar local extrai direto.
+        # Vamos detectar onde está o main.sh para saber qual pasta usar.
+        if [ -f "$TMP_DIR/main.sh" ]; then
+            SOURCE_DIR="$TMP_DIR"
         else
-            # Compara usando checksum (mais confiável que diff)
-            local_hash=$(md5sum "$FILE_PATH" 2>/dev/null | awk '{print $1}')
-            remote_hash=$(md5sum "$TMP_FILE" 2>/dev/null | awk '{print $1}')
-            
-            if [ "$local_hash" != "$remote_hash" ]; then
-                # Arquivos são diferentes - atualizar
-                if [[ "$FILE_NAME" == "main.sh" ]]; then
-                    mv "$TMP_FILE" "$FILE_PATH"
-                    chmod +x "$FILE_PATH"
-                    echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} ATUALIZADO ${COLOR_MAGENTA}(reinicie o script)${COLOR_RESET}"
-                    updated_count=$((updated_count + 1))
-                    main_updated=1
-                else
-                    mv "$TMP_FILE" "$FILE_PATH"
-                    chmod +x "$FILE_PATH"
-                    echo -e "${COLOR_YELLOW}${SYMBOL_UPDATE} ATUALIZADO${COLOR_RESET}"
-                    updated_count=$((updated_count + 1))
-                fi
-            else
-                # Arquivos são idênticos - manter
-                rm "$TMP_FILE"
-                echo -e "${COLOR_GREEN}${SYMBOL_CHECK} OK${COLOR_RESET}"
-                ok_count=$((ok_count + 1))
-            fi
+            EXTRACTED_FOLDER=$(ls -1 "$TMP_DIR" | head -n 1)
+            SOURCE_DIR="$TMP_DIR/$EXTRACTED_FOLDER"
         fi
-    done
-    
-    echo ""
-    echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
-    echo -e "${COLOR_BOLD}📊 Resumo da Verificação:${COLOR_RESET}"
-    echo ""
-    
-    if [ $new_count -gt 0 ]; then
-        echo -e "   ${COLOR_MAGENTA}${SYMBOL_NEW} Novos:        ${new_count} arquivo(s)${COLOR_RESET}"
-    fi
-    
-    if [ $updated_count -gt 0 ]; then
-        echo -e "   ${COLOR_YELLOW}${SYMBOL_UPDATE} Atualizados:  ${updated_count} arquivo(s)${COLOR_RESET}"
-    fi
-    
-    if [ $ok_count -gt 0 ]; then
-        echo -e "   ${COLOR_GREEN}${SYMBOL_CHECK} Atualizados:  ${ok_count} arquivo(s)${COLOR_RESET}"
-    fi
-    
-    if [ $error_count -gt 0 ]; then
-        echo -e "   ${COLOR_RED}${SYMBOL_ERROR} Erros:        ${error_count} arquivo(s)${COLOR_RESET}"
-    fi
-    
-    echo ""
-    
-    if [ $((new_count + updated_count)) -gt 0 ]; then
-        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Verificação concluída com atualizações!${COLOR_RESET}"
         
-        # Se o main.sh foi atualizado, avisar e reiniciar automaticamente
-        if [ $main_updated -eq 1 ]; then
-            echo ""
-            echo -e "${COLOR_YELLOW}${COLOR_BOLD}⚠️  ATENÇÃO:${COLOR_RESET}"
-            echo -e "${COLOR_YELLOW}   O arquivo main.sh foi atualizado!${COLOR_RESET}"
-            echo -e "${COLOR_GREEN}   Reiniciando automaticamente em:${COLOR_RESET}"
-            echo ""
+        if [ -n "$SOURCE_DIR" ] && [ -d "$SOURCE_DIR" ] && [ -f "$SOURCE_DIR/main.sh" ]; then
+            echo -e "${COLOR_BLUE}${SYMBOL_LOADING} Aplicando atualização...${COLOR_RESET}"
             
-            # Contador regressivo de 5 segundos
-            for i in 5 4 3 2 1; do
-                echo -ne "   ${COLOR_CYAN}${COLOR_BOLD}$i${COLOR_RESET} segundos...\r"
-                sleep 1
-            done
+            # Garantir permissão de execução em arquivos sh
+            find "$SOURCE_DIR" -type f -name "*.sh" -exec chmod +x {} \;
             
-            echo ""
-            echo -e "${COLOR_GREEN}${SYMBOL_LOADING} Reiniciando o script...${COLOR_RESET}"
-            echo ""
-            sleep 1
+            # Copia os arquivos por cima (usando cp -a para preservar permissões)
+            cp -a "$SOURCE_DIR/"* "$SCRIPT_DIR/"
             
-            # Reinicia o script automaticamente
-            exec "$SCRIPT_DIR/main.sh"
+            # Atualiza o hash local para não baixar novamente
+            echo "$LATEST_COMMIT" > "$LOCAL_COMMIT_FILE"
+            
+            # Limpeza
+            rm -rf "$TMP_DIR"
+            
+            echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Atualização aplicada com sucesso!${COLOR_RESET}"
+            echo -e "${COLOR_GREEN}${SYMBOL_LOADING} Reiniciando o script automaticamente...${COLOR_RESET}"
+            sleep 2
+            
+            # Reinicia o script passando os mesmos argumentos
+            exec "$SCRIPT_DIR/main.sh" "$@"
+        else
+            echo -e "${COLOR_RED}${SYMBOL_ERROR} Erro: Pasta extraída não encontrada.${COLOR_RESET}"
+            rm -rf "$TMP_DIR"
+            sleep 2
         fi
     else
-        echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Todos os arquivos estão atualizados!${COLOR_RESET}"
+        echo -e "${COLOR_RED}${SYMBOL_ERROR} Falha ao baixar ou extrair o pacote. Iniciando versão local.${COLOR_RESET}"
+        rm -rf "$TMP_DIR"
+        sleep 2
     fi
-    
-    echo -e "${COLOR_CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${COLOR_RESET}"
-    echo ""
-    sleep 2
 }
 
 # Se o script for chamado com o argumento "update"
@@ -265,9 +180,22 @@ for f in "$FUNCTIONS_DIR/pbs"/*.sh; do
     fi
 done
 
+extras_count=0
+# Carrega funções Extras
+echo ""
+echo -e "${COLOR_CYAN}${SYMBOL_ARROW} Ferramentas Gerais (Extras)${COLOR_RESET}"
+for f in "$FUNCTIONS_DIR/extras"/*.sh; do
+    if [ -f "$f" ]; then
+        source "$f"
+        extras_count=$((extras_count + 1))
+        printf "  ${COLOR_GRAY}▸${COLOR_RESET} $(basename "$f")\n"
+    fi
+done
+
 echo ""
 echo -e "${COLOR_GREEN}${SYMBOL_CHECK} ${pve_count} módulos PVE carregados${COLOR_RESET}"
 echo -e "${COLOR_GREEN}${SYMBOL_CHECK} ${pbs_count} módulos PBS carregados${COLOR_RESET}"
+echo -e "${COLOR_GREEN}${SYMBOL_CHECK} ${extras_count} módulos Extras carregados${COLOR_RESET}"
 echo ""
 sleep 1
 
@@ -351,6 +279,9 @@ main_menu(){
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Proxmox Backup Server (PBS)${COLOR_RESET}                               ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}       ${COLOR_GRAY}Gerenciamento do Proxmox Backup Server${COLOR_RESET}                    ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Ferramentas Gerais e Extras${COLOR_RESET}                               ${COLOR_CYAN}│${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}       ${COLOR_GRAY}Testes de disco, badblocks, SMART, etc.${COLOR_RESET}                   ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Sair${COLOR_RESET}                                                      ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
