@@ -1,438 +1,367 @@
-# Proxmox Management Scripts
+# 🖥️ PVE-SCRIPTS-V2 — Proxmox Management Suite
 
-Suite completa de scripts bash para automação e gerenciamento de ambientes Proxmox VE e Proxmox Backup Server.
+Suite completa de scripts Bash para automação e gerenciamento interativo de ambientes **Proxmox VE** e **Proxmox Backup Server** via terminal.
 
-## Visão Geral
+---
 
-Este projeto oferece uma interface interativa via terminal para gerenciar operações comuns em servidores Proxmox, incluindo atualizações de sistema, configurações de rede, gestão de discos, backups, instalação de aplicações e muito mais.
+## ✨ Visão Geral
 
-## Características
+Interface de menu interativa com navegação por tecla única, organizada em módulos independentes. Inclui sistema de auto-atualização via GitHub, integração nativa com Telegram para alertas e gerenciamento, monitoramento térmico com proteção de hardware e muito mais.
 
-- Interface de menu interativa com navegação simplificada
-- Suporte completo para Proxmox VE e Proxmox Backup Server
-- Sistema de auto-atualização via GitHub
-- Instalação automática na inicialização do shell
-- Código modular e organizado por funcionalidade
-- Visual moderno com cores e símbolos Unicode
+---
 
-## Requisitos
-
-- Proxmox VE 7.x ou superior / Proxmox Backup Server 2.x ou superior
-- Sistema operacional Debian-based
-- Acesso root
-- Conexão com internet (para atualizações e instalação de pacotes)
-
-## Instalação
+## 🚀 Instalação
 
 ```bash
-# Cria diretório, baixa e executa o script principal
-mkdir -p /TcTI/SCRIPTS/PROXMOX && cd /TcTI/SCRIPTS/PROXMOX && curl -sL -o main.sh https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main/main.sh && chmod +x main.sh && ./main.sh
+mkdir -p /TcTI/SCRIPTS/PROXMOX && cd /TcTI/SCRIPTS/PROXMOX \
+  && curl -sL -o main.sh https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main/main.sh \
+  && chmod +x main.sh && ./main.sh
 ```
 
-O script principal irá baixar automaticamente todos os módulos necessários na primeira execução.
+O script principal baixa e verifica automaticamente todos os módulos na primeira execução.
 
-### Instalação automática na inicialização
+### Forçar atualização completa
 
-O script oferece opção para carregar automaticamente ao abrir o terminal:
-- Acesse: `Menu Proxmox VE > Tweaks > Instala script automaticamente`
-- Após instalado, o script será executado automaticamente em novos logins
+```bash
+rm /TcTI/SCRIPTS/PROXMOX/.local_version && ./main.sh
+```
 
-## Estrutura do Projeto
+---
+
+## 📁 Estrutura do Projeto
 
 ```
 PVE-SCRIPTS-V2/
-├── main.sh                          # Script principal e gerenciador de atualizações
+├── main.sh                                    # Script principal, auto-updater e loader de módulos
+├── temp/
+│   └── pve_temp_monitor.py                    # Backend Python de monitoramento térmico
 ├── functions/
-│   ├── pve/                         # Funções específicas do Proxmox VE
-│   │   ├── menu_pve.sh              # Menu principal PVE
-│   │   ├── menu_update.sh           # Atualizações e instalações
-│   │   ├── menu_upgrade.sh          # Upgrade de versões
-│   │   ├── menu_disco.sh            # Gerenciamento de discos
-│   │   ├── menu_bkp.sh              # Configurações de backup
-│   │   ├── menu_email.sh            # Configurações de e-mail/SMTP
-│   │   ├── menu_vm_operations.sh    # Operações em VMs
-│   │   ├── menu_tweaks.sh           # Otimizações e ajustes
-│   │   ├── menu_lan.sh              # Configurações de rede
-│   │   ├── menu_commands.sh         # Comandos úteis
-│   │   ├── menu_instala_script.sh   # Instalação automática
-│   │   ├── menu_instala_x.sh        # Instalação de interface gráfica
-│   │   ├── menu_watch_dog.sh        # Configuração de watchdog
-│   │   ├── menu_instala_aplicativos.sh        # Menu de aplicações
-│   │   ├── menu_instala_tactical_rmm.sh       # TacticalRMM
-│   │   ├── menu_instala_cloudflared.sh        # Cloudflare Tunnel
-│   │   ├── live_migration.sh        # Migração ao vivo de VMs
-│   │   └── destranca_desliga.sh     # Destravar e desligar VMs
-│   └── pbs/                         # Funções específicas do Proxmox Backup Server
-│       ├── menu_pbs.sh              # Menu principal PBS
-│       ├── menu_update_pbs.sh       # Atualizações PBS
-│       ├── menu_upgrade_pbs.sh      # Upgrade PBS
-│       ├── menu_disco_pbs.sh        # Discos PBS
-│       ├── menu_email_pbs.sh        # E-mail PBS
-│       ├── menu_lan_pbs.sh          # Rede PBS
-│       └── menu_tweaks_pbs.sh       # Tweaks PBS
+│   ├── pve/                                   # Módulos Proxmox Virtual Environment
+│   │   ├── menu_pve.sh                        # Menu principal PVE
+│   │   ├── menu_update.sh                     # Atualizações de pacotes
+│   │   ├── menu_upgrade.sh                    # Upgrade de versões do Proxmox VE
+│   │   ├── menu_disco.sh                      # Gerenciamento de discos
+│   │   ├── menu_bkp.sh                        # Configurações de backup (NFS/CIFS/Local)
+│   │   ├── menu_vm_operations.sh              # Operações em VMs (migrar, desligar, etc.)
+│   │   ├── menu_watch_dog.sh                  # Watchdog de VMs (Auto-restart via Ping)
+│   │   ├── menu_ceph.sh                       # Gerenciamento Ceph (cluster storage)
+│   │   ├── menu_ia.sh                         # Assistente de IA (OpenAI / Gemini)
+│   │   ├── menu_instala_script.sh             # Auto-inicialização no login do shell
+│   │   ├── menu_instala_aplicativos.sh        # Hub de instalação de aplicativos
+│   │   ├── menu_instala_tactical_rmm.sh       # Instalação/Remoção do TacticalRMM
+│   │   ├── menu_instala_cloudflared.sh        # Instalação/Remoção do Cloudflare Tunnel
+│   │   ├── menu_instala_zabbix.sh             # Instalação/Remoção do Zabbix Agent
+│   │   ├── live_migration.sh                  # Migração ao vivo de VMs entre nodes
+│   │   ├── destranca_desliga.sh               # Destravar e forçar desligamento de VMs
+│   │   ├── funcao_instalar_na_inicializacao.sh # Helper de auto-start
+│   │   └── vm_config_checker.sh               # Verificação de configuração de VMs
+│   ├── pbs/                                   # Módulos Proxmox Backup Server
+│   │   ├── menu_pbs.sh                        # Menu principal PBS
+│   │   ├── menu_update_pbs.sh                 # Atualizações PBS
+│   │   ├── menu_upgrade_pbs.sh                # Upgrade PBS
+│   │   └── menu_disco_pbs.sh                  # Gerenciamento de discos PBS
+│   └── extras/                                # Ferramentas Gerais e Diagnósticos
+│       ├── menu_extras.sh                     # Menu raiz de Extras (Menu 3)
+│       ├── menu_extras_disco.sh               # Speed test, Badblocks, SMART
+│       ├── menu_extras_email.sh               # Configuração Postfix / SMTP / aliases
+│       ├── menu_extras_rede.sh                # Interfaces, DNS e Hosts
+│       ├── menu_extras_sistema.sh             # Sistema, Temperatura, SWAP, Watchdog
+│       ├── menu_extras_comandos.sh            # Cheat-sheet Linux / PVE / caminhos
+│       ├── menu_extras_gerenciamento.sh       # Central de Mensageria (Telegram/WhatsApp)
+│       ├── menu_extras_ia.sh                  # Gerenciamento de chaves de IA
+│       ├── menu_telegram.sh                   # Bot de Gerenciamento + Bot de Notificações
+│       ├── disk_badblocks.sh                  # Helper badblocks
+│       ├── disk_smart.sh                      # Helper SMART info
+│       └── disk_speed_test.sh                 # Helper speed test (fio/dd)
 └── README.md
 ```
 
-## Funcionalidades
+---
 
-### Proxmox VE
+## 🗂️ Menus e Funcionalidades
 
-#### 1. Atualização, Instalação e Upgrade
-- Atualização de pacotes do sistema
-- Upgrade entre versões do Proxmox
-- Instalação de aplicativos terceiros
+### Menu 1 — Proxmox Virtual Environment (PVE)
 
-#### 2. Gerenciamento de Discos
-- Formatação de discos adicionais
-- Montagem automática via fstab
-- Configuração de permissões
-- Suporte para ext4, xfs, btrfs
+| Opção | Descrição |
+|-------|-----------|
+| 1 | Atualização e Upgrade de Pacotes do Sistema |
+| 2 | Gerenciamento de Discos (formatar, montar, fstab) |
+| 3 | Backup (NFS, CIFS, diretório local, agendamento) |
+| 4 | Migração ao Vivo de VMs entre nodes |
+| 5 | Instalar Aplicativos (TacticalRMM, Cloudflared, Zabbix) |
+| 6 | Operações em VMs (Destravar, Desligar, Verificar Config) |
+| 7 | Assistente de IA (OpenAI GPT-4o / Gemini 2.5) |
 
-#### 3. Backup e Recuperação
-- Configuração de destinos de backup
-- Agendamento automático
-- Backup para NFS, CIFS, Diretórios locais
-- Verificação de integridade
+### Menu 2 — Proxmox Backup Server (PBS)
 
-#### 4. Configuração de E-mail/SMTP
-- Configuração de servidor SMTP
-- Testes de envio
-- Notificações de sistema
-- Suporte para autenticação SSL/TLS
+| Opção | Descrição |
+|-------|-----------|
+| 1 | Atualização e Upgrade do PBS |
+| 2 | Gerenciamento de Discos PBS |
 
-#### 5. Operações em VMs
-- **Live Migration**: Migração de VMs entre nodes sem downtime
-  - Seleção de VM de origem
-  - Escolha de node de destino
-  - Verificação de recursos
-  - Migração com rollback automático em caso de falha
-  
-- **Destrava e Desliga**: Liberação de VMs travadas
-  - Identifica VMs com lock
-  - Remove locks com segurança
-  - Desligamento forçado quando necessário
+### Menu 3 — Ferramentas Gerais (Extras)
 
-#### 6. Tweaks e Otimizações
-- Configuração de kernel parameters
-- Otimização de I/O
-- Ajustes de memória
-- Habilitação de recursos avançados
-- IOMMU e PCI passthrough
-- Instalação automática do script
+| Opção | Sub-menu |
+|-------|----------|
+| 1 | 🖴 Ferramentas e Diagnósticos de Disco |
+| 2 | 📧 Configuração de Notificações por E-mail (Postfix/SMTP) |
+| 3 | 🌐 Configurações de Rede (interfaces, DNS, hosts) |
+| 4 | ⚙️ Ajustes de Sistema, Host e Watchdog |
+| 5 | 📋 Comandos e Informações Úteis (cheat-sheet) |
+| 6 | 🤖 Gerenciamento de Chaves de IA |
+| 7 | 📡 Central de Gerenciamento e Notificações (Telegram) |
 
-#### 7. Configurações de Rede
-- Configuração de interfaces
-- Bridges e bonds
-- VLAN tagging
-- Configuração de firewall
-- Port forwarding
+---
 
-#### 8. Comandos Úteis
-- Limpeza de cache
-- Verificação de logs
-- Status de serviços
-- Informações do sistema
-- Monitoramento de recursos
+## 🔥 Monitoramento Térmico & Proteção de Hardware
 
-#### 9. Interface Gráfica (X Server)
-- Instalação de ambiente gráfico
-- XFCE4 desktop environment
-- VNC server
-- Remote desktop
+Disponível em: **Menu 3 → 4 → 1**
 
-#### 10. Watchdog
-- Configuração de watchdog timer
-- Reinicialização automática em caso de travamento
-- Monitoramento de saúde do sistema
+Sistema completo de monitoramento de temperatura com desligamento escalonado de emergência.
 
-### Aplicações de Terceiros
+### Funcionalidades
 
-#### TacticalRMM
-Agente de monitoramento e gerenciamento remoto.
+- **Leitura Inteligente de Sensores** com cascata automática de fallback:
+  1. `ipmitool sdr` (HPE iLO / Dell iDRAC / IPMI local)
+  2. `lm-sensors` (sensores de placa-mãe / CPU)
+  3. Kernel Sysfs (`/sys/class/thermal` / `/sys/class/hwmon`)
 
-**Funcionalidades:**
-- Instalação guiada com validação de parâmetros
-- Configuração de Mesh Agent e API
-- Suporte para diferentes tipos de agente (workstation/server)
-- Desinstalação segura
-- Validação de URLs e credenciais
+- **Filtro Inteligente de Sensores** — ignora automaticamente chips de rede PCI (`tg3`, `e1000e`) que operam naturalmente a 55–65°C e causariam falsos alarmes
 
-**Parâmetros necessários:**
-- Mesh URL (endpoint do MeshCentral)
-- API URL (endpoint da API TacticalRMM)
-- Client ID (identificador do cliente)
-- Site ID (identificador do site)
-- Auth Key (chave de autenticação)
-- Agent Type (workstation ou server)
+- **Modo de Alvo Configurável** (`target`):
+  - `ambient` — monitora temperatura da sala/ar-condicionado (Front Ambient / Inlet)
+  - `cpu` — monitora temperatura dos processadores (Package / Core)
 
-#### Cloudflare Tunnel
-Túnel reverso seguro para expor serviços sem abrir portas no firewall.
+- **Alarmes Escalonados via Telegram**:
+  - 🟡 **Warning** (ex: 30°C) — Alerta de sala quente, verificar ar-condicionado
+  - ⚠️ **Crítico 1** (ex: 60°C) — Desligamento automático das VMs secundárias
+  - 🚨 **Crítico 2** (ex: 80°C) — Desligamento de emergência do host Proxmox VE
 
-**Funcionalidades:**
-- Instalação do cloudflared daemon
-- Configuração de túnel com token
-- Auto-start no boot
-- Monitoramento de status
-- Desinstalação completa
+- **Agendamento via Crontab do Root** (`crontab -e`), a cada 2 minutos
+- **Editor interativo do `config.ini`** diretamente pelo menu Bash
+- **Simulações Dry-Run** (65°C e 82°C) sem desligamentos reais
+- **Instalação automática** de `lm-sensors` e `ipmitool` ao abrir o menu
 
-**Status em tempo real:**
-- Estado da instalação
-- Versão instalada
-- Status do serviço (ativo/inativo)
-- Configuração do túnel
+### Arquivos
 
-### Proxmox Backup Server
+| Arquivo | Localização |
+|---------|-------------|
+| Script Python | `/TcTI/SCRIPTS/monitoramento-temp/pve_temp_monitor.py` |
+| Configurações | `/TcTI/SCRIPTS/monitoramento-temp/config.ini` |
+| Logs | `/TcTI/SCRIPTS/monitoramento-temp/pve_temp_monitor.log` |
+| Estado | `/TcTI/SCRIPTS/monitoramento-temp/state.json` |
 
-#### 1. Atualizações
-- Atualização de pacotes PBS
-- Patches de segurança
-- Upgrade do sistema
+---
 
-#### 2. Gerenciamento de Discos
-- Configuração de datastores
-- Formatação de discos para backup
-- Montagem e permissões
+## 📡 Central de Mensageria Telegram
 
-#### 3. Configuração de E-mail
-- Notificações de backup
-- Alertas de sistema
-- Relatórios automáticos
+Disponível em: **Menu 3 → 7**
 
-#### 4. Rede
-- Configuração de interfaces
-- Acesso remoto
-- Sincronização entre servidores
+### 1 — 🤖 Gerenciamento via Telegram (Bot Interativo)
 
-#### 5. Tweaks
-- Otimizações de performance
-- Configurações de retenção
-- Prune automático
-- Auto-start do script
+Bot conversacional que permite ao técnico gerenciar o servidor Proxmox pelo Telegram:
+- Iniciar / Parar / Reiniciar serviço do bot
+- Ver status em tempo real no header do menu
+- Configuração de token e chat ID com teste imediato
 
-## Sistema de Auto-Atualização
+Credenciais: `/TcTI/SCRIPTS/telegram/.env` (base64 JSON)
 
-O script verifica automaticamente por atualizações no GitHub a cada execução.
+### 2 — 📣 Notificações via Telegram (Bot Passivo)
 
-**Características:**
-- Comparação via MD5 checksum
-- Bypass de cache com timestamps
-- Indicadores visuais de status:
-  - 🆕 NOVO - Arquivo não existia localmente
-  - 🔄 ATUALIZADO - Arquivo foi modificado
-  - ✓ OK - Arquivo está atualizado
-  - ✗ ERRO - Falha no download
-  
-**Reinício automático:**
-Quando o `main.sh` é atualizado, o script reinicia automaticamente após contagem regressiva de 5 segundos.
+Bot separado para receber **alertas automáticos** do sistema:
+- Alertas de temperatura (Monitoramento Térmico)
+- Notificações de eventos críticos
+- Cadastro via menu com token, chat ID e nome do servidor
+- Teste de envio de mensagem imediato
 
-## Auto-Inicialização
+Credenciais: `/TcTI/SCRIPTS/telegram/.env_notificacoes`
 
-O sistema pode ser configurado para executar automaticamente ao abrir o terminal.
+> **Separação de responsabilidades**: use o Bot de Gerenciamento para comandos e o Bot de Notificações para alertas passivos — cada um com seu próprio token.
 
-**Como funciona:**
-- Cria script em `/etc/profile.d/tcti-proxmox-auto.sh`
-- Baixa versão mais recente do `main.sh` a cada login
-- Backup automático em caso de falha
-- Rollback para versão anterior se download falhar
+---
 
-**Instalação:**
-```bash
-# Via menu interativo
-Menu PVE > Tweaks > Instala script automaticamente > Opção 1
+## 🐕 Watchdog de VMs
 
-# Manual
-bash functions/pve/menu_instala_script.sh
-```
+Disponível em: **Menu 3 → 4 → 5**
 
-**Desinstalação:**
-```bash
-# Via menu
-Menu PVE > Tweaks > Instala script automaticamente > Opção 2
+Monitora VMs via ping e reinicia automaticamente caso fiquem offline.
 
-# Manual
-rm /etc/profile.d/tcti-proxmox-auto.sh
-```
+- Adicionar/Remover VMs monitoradas (por ID e IP)
+- Agendamento automático a cada 10 minutos via crontab
+- Cada VM gera um script individual em `/TcTI/SCRIPTS/WATCHDOG/`
 
-## Migração ao Vivo (Live Migration)
+---
 
-Permite mover VMs entre nodes do cluster sem interrupção de serviço.
+## 🤖 Assistente de IA Integrado
 
-**Pré-requisitos:**
-- Cluster Proxmox configurado
-- Storage compartilhado ou replicado
-- Rede de migração configurada
-- Recursos suficientes no node destino
+Disponível no **Menu PVE → 7** e nas chaves em **Menu 3 → 6**
 
-**Processo:**
-1. Lista VMs disponíveis no node atual
-2. Solicita ID da VM a migrar
-3. Valida existência e estado da VM
-4. Lista nodes disponíveis no cluster
-5. Solicita node de destino
-6. Verifica recursos no destino
-7. Executa migração com `qm migrate`
-8. Confirma sucesso da operação
+Modelos suportados:
+- **Gemini 2.5 Flash** (padrão, mais rápido)
+- **Gemini 2.5 Pro** (mais avançado)
+- **OpenAI GPT-4o**
+- **OpenAI GPT-4o-mini**
 
-**Segurança:**
-- Validação de parâmetros em cada etapa
-- Verificação de status antes de migrar
-- Rollback automático em falhas
-- Logs detalhados de operação
+---
 
-## Desenvolvimento
+## 🔄 Sistema de Auto-Atualização
 
-### Adicionando Novas Funcionalidades
+O `main.sh` verifica automaticamente por atualizações no GitHub a cada execução, comparando via MD5 checksum.
 
-1. Crie um novo arquivo em `functions/pve/` ou `functions/pbs/`
-2. Implemente a função seguindo o padrão:
+**Indicadores visuais:**
+- 🆕 `NOVO` — Arquivo novo instalado localmente
+- 🔄 `ATUALIZADO` — Arquivo foi atualizado
+- `✓ OK` — Já está na versão mais recente
+- `✗ ERRO` — Falha no download
+
+Quando o próprio `main.sh` é atualizado, reinicia automaticamente com contagem regressiva de 5 segundos.
+
+---
+
+## ⚙️ Auto-Inicialização no Login
+
+Disponível em: **Menu PVE → Tweaks / Menu 3 → 4 → 4**
+
+Instala o script em `/etc/profile.d/proxmox-ini.sh` para execução automática ao abrir um novo terminal SSH.
+
+---
+
+## 🔒 Segurança
+
+- Todos os scripts requerem privilégios **root**
+- Validação de entradas do usuário em operações críticas
+- Confirmação dupla antes de operações destrutivas
+- Logs detalhados de todas as operações relevantes
+- Credenciais do Telegram armazenadas com permissão `600` (somente root)
+- Timeouts configuráveis nas chamadas à API do Telegram para evitar travamentos
+
+---
+
+## 🛠️ Desenvolvimento
+
+### Adicionando um novo módulo
+
+1. Crie `functions/extras/meu_modulo.sh` ou `functions/pve/meu_modulo.sh`
+2. Declare a função principal seguindo o padrão de menu do projeto:
 
 ```bash
 #!/bin/bash
 
-# Descrição da funcionalidade
-
 minha_funcao() {
-    clear
-    # Cores e símbolos
-    COLOR_CYAN="\033[1;36m"
-    COLOR_RESET="\033[0m"
-    # ... outras cores
-    
-    # Header do menu
-    echo -e "${COLOR_CYAN}${COLOR_BOLD}"
-    echo -e "╔═════════════════════════════════════════════════════════════════════╗"
-    echo -e "║                    Título da Funcionalidade                         ║"
-    echo -e "╚═════════════════════════════════════════════════════════════════════╝"
-    echo -e "${COLOR_RESET}"
-    
-    # Lógica da função
-    # ...
+    while true; do
+        clear
+        echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+        echo -e "╔═════════════════════════════════════════════════════════════════════╗"
+        echo -e "║                         Título do Módulo                           ║"
+        echo -e "╚═════════════════════════════════════════════════════════════════════╝"
+        echo -e "${COLOR_RESET}"
+        # ... opções de menu ...
+        read -rsn1 opt
+        case "$opt" in
+            1) # ação ;;
+            0|"") return 0 ;;
+        esac
+    done
 }
 ```
 
-3. Adicione o arquivo em `main.sh` no array `REQUIRED_FILES`
-4. Chame a função no menu apropriado
+3. O `main.sh` carrega automaticamente todos os `.sh` das pastas `functions/pve/`, `functions/pbs/` e `functions/extras/` via source — não é necessário registrar o arquivo manualmente.
+4. Referencie a função no menu adequado (`menu_extras.sh`, `menu_pve.sh`, etc.).
 
-### Padrões de Código
-
-- Use 4 espaços para indentação
-- Prefixe funções auxiliares com o nome do módulo
-- Valide todas as entradas do usuário
-- Forneça feedback visual para operações longas
-- Implemente tratamento de erros
-- Adicione confirmações para operações destrutivas
-
-### Cores e Símbolos
+### Paleta de Cores e Símbolos
 
 ```bash
-# Cores
-COLOR_RESET="\033[0m"
-COLOR_BOLD="\033[1m"
-COLOR_GREEN="\033[1;32m"
-COLOR_BLUE="\033[1;34m"
-COLOR_CYAN="\033[1;36m"
-COLOR_YELLOW="\033[1;33m"
-COLOR_RED="\033[1;31m"
-COLOR_MAGENTA="\033[1;35m"
-COLOR_WHITE="\033[1;37m"
-COLOR_GRAY="\033[1;90m"
+COLOR_RESET="\\033[0m"   COLOR_BOLD="\\033[1m"
+COLOR_GREEN="\\033[1;32m" COLOR_CYAN="\\033[1;36m"
+COLOR_YELLOW="\\033[1;33m" COLOR_RED="\\033[1;31m"
+COLOR_WHITE="\\033[1;37m" COLOR_GRAY="\\033[1;90m"
+COLOR_BLUE="\\033[1;34m"  COLOR_MAGENTA="\\033[1;35m"
 
-# Símbolos
-SYMBOL_CHECK="✓"
-SYMBOL_ERROR="✗"
-SYMBOL_LOADING="🔄"
-SYMBOL_INFO="ℹ"
-SYMBOL_ARROW="➜"
-SYMBOL_NEW="🆕"
-SYMBOL_UPDATE="🔄"
+SYMBOL_CHECK="✓"   SYMBOL_ERROR="✗"
+SYMBOL_ARROW="➜"   SYMBOL_LOADING="🔄"
+SYMBOL_INFO="ℹ"    SYMBOL_NEW="🆕"
 ```
 
-## Segurança
+---
 
-- Todos os scripts requerem privilégios root
-- Validação de entrada do usuário
-- Confirmações para operações críticas
-- Backup antes de modificações importantes
-- Logs de operações realizadas
-
-## Solução de Problemas
+## 🐛 Solução de Problemas
 
 ### Script não atualiza
 ```bash
-# Força atualização completa
-cd /TcTI/SCRIPTS/PROXMOX && rm -f main.sh && curl -sL -o main.sh https://raw.githubusercontent.com/TcTI-BR/PVE-SCRIPTS-V2/main/main.sh && chmod +x main.sh && ./main.sh
+rm /TcTI/SCRIPTS/PROXMOX/.local_version && ./main.sh
 ```
 
-### Auto-start não funciona
-```bash
-# Verifica se o arquivo existe
-ls -la /etc/profile.d/tcti-proxmox-auto.sh
+### Temperatura mostrando valor errado (59°C de placa de rede)
+Acesse **Menu 3 → 4 → 1 → 4 → Opção 5** e altere o **Foco do Alvo**:
+- `ambient` — temperatura da sala (Front Ambient / Inlet ~20–28°C)
+- `cpu` — temperatura dos processadores (~40–50°C)
 
-# Reinstala
-bash functions/pve/menu_instala_script.sh
-```
+### Bot Telegram não responde / trava
+O script usa `timeout=10` nas chamadas à API. Se persistir, reinicie o serviço:
+- **Menu 3 → 7 → 1 → Reiniciar Serviço**
+
+### Watchdog não abre (volta ao menu sem fazer nada)
+Certifique-se de que o arquivo `functions/pve/menu_watch_dog.sh` está sendo carregado corretamente. A função correta se chama `watch_dog` (sem prefixo `menu_`).
 
 ### Erro de permissão
 ```bash
-# Garante execução como root
-cd /TcTI/SCRIPTS/PROXMOX && bash main.sh
-
-# Corrige permissões de todos os scripts
 cd /TcTI/SCRIPTS/PROXMOX && find . -name "*.sh" -exec chmod +x {} \;
 ```
 
-### Erro de dependências
+### Dependências ausentes
 ```bash
-# Atualiza sistema
-apt update && apt upgrade -y
-
-# Instala dependências mínimas
-apt install -y curl
+apt update && apt install -y curl python3 lm-sensors ipmitool
 ```
 
-## Contribuindo
+---
 
-Contribuições são bem-vindas! 
+## 📦 Changelog
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
+### v2.3 (Atual)
+- ✅ **Monitoramento Térmico & Proteção de Hardware** com cascata de sensores (IPMI → lm-sensors → Sysfs)
+- ✅ **Filtro Inteligente de Sensores** (ignora chips de rede PCI com temperatura alta natural)
+- ✅ **Bot de Notificações Telegram** separado do Bot de Gerenciamento
+- ✅ Central de Mensageria unificada em **Menu 3 → 7**
+- ✅ Assistente de IA com modelos atualizados (Gemini 2.5 Flash/Pro, GPT-4o/mini)
+- ✅ Editor interativo do `config.ini` pelo menu Bash
 
-## Licença
+### v2.2
+- ✅ Migração do Telegram para **Menu 3 (Extras)**
+- ✅ Integração do Zabbix Agent
+- ✅ Menu Ceph para gerenciamento de cluster storage
+- ✅ VM Config Checker
 
-Este projeto é distribuído sob licença livre. Use por sua conta e risco.
-
-## Avisos
-
-- Teste em ambiente não-produção primeiro
-- Faça backup antes de modificações críticas
-- Leia a documentação do Proxmox para entender os comandos
-- O uso é de inteira responsabilidade do usuário
-
-## Suporte
-
-Para reportar bugs ou solicitar features:
-- Abra uma issue no GitHub
-- Descreva o problema detalhadamente
-- Inclua logs e mensagens de erro
-- Informe versão do Proxmox e do script
-
-## Changelog
+### v2.1
+- ✅ Reestruturação do Menu 3 (Extras) com 7 categorias
+- ✅ Chave de IA movida para Menu 3
+- ✅ Configurações de Rede movidas para Menu 3
 
 ### v2.0
-- Refatoração completa da estrutura de código
-- Interface modernizada com cores e símbolos
-- Sistema de auto-atualização via GitHub
-- Suporte para instalação de aplicações terceiras
-- Adição do TacticalRMM e Cloudflare Tunnel
-- Migração ao vivo de VMs melhorada
-- Documentação expandida
+- ✅ Refatoração completa da estrutura modular
+- ✅ Interface modernizada com cores e Unicode
+- ✅ Sistema de auto-atualização via GitHub com MD5 checksum
+- ✅ TacticalRMM e Cloudflare Tunnel
+- ✅ Migração ao vivo de VMs
 
 ### v1.0
-- Versão inicial
-- Funcionalidades básicas de gerenciamento PVE/PBS
+- Versão inicial com funcionalidades básicas PVE/PBS
+
+---
+
+## ⚠️ Avisos
+
+- Sempre teste em ambiente **não-produção** primeiro
+- Faça **backup** antes de modificações críticas
+- Operações de desligamento de host (Crítico 2) são **irreversíveis** — configure os limites com cuidado
+- O uso é de inteira responsabilidade do usuário
+
+---
+
+## 📞 Suporte
+
+Para reportar bugs ou solicitar features:
+- Abra uma **issue** no GitHub com descrição detalhada
+- Inclua logs, mensagens de erro e versão do Proxmox
 
 ---
 
