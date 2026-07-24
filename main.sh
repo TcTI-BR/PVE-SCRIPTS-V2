@@ -50,6 +50,7 @@ REQUIRED_FILES=(
     "$FUNCTIONS_DIR/pve/menu_ia.sh"
     "$FUNCTIONS_DIR/pve/openai_key_manager.sh"
     "$FUNCTIONS_DIR/pve/vm_config_checker.sh"
+    "$FUNCTIONS_DIR/pve/menu_telegram.sh"
     # Funções PBS
     "$FUNCTIONS_DIR/pbs/menu_pbs.sh"
     "$FUNCTIONS_DIR/pbs/menu_update_pbs.sh"
