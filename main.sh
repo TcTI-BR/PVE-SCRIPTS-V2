@@ -95,7 +95,9 @@ run_updater() {
     TMP_DIR="/tmp/pve_scripts_update_$$"
     mkdir -p "$TMP_DIR"
     
-    TAR_URL="https://github.com/TcTI-BR/PVE-SCRIPTS-V2/archive/refs/heads/main.tar.gz"
+    # Adicionando um timestamp na URL para forçar o GitHub a não entregar cache antigo
+    CACHE_BUSTER="?t=$(date +%s%N)"
+    TAR_URL="https://github.com/TcTI-BR/PVE-SCRIPTS-V2/archive/refs/heads/main.tar.gz$CACHE_BUSTER"
     
     if curl -sL "$TAR_URL" | tar -xz -C "$TMP_DIR"; then
         echo -e "${COLOR_GREEN}${SYMBOL_CHECK} Download e extração concluídos.${COLOR_RESET}"
