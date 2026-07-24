@@ -301,6 +301,9 @@ main_menu(){
 	    2) clear;
 		pbs_menu
 			;;
+	    3) clear;
+		extras_menu
+			;;
 		0)
 		clear
 		exit
