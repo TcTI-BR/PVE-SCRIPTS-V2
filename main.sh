@@ -277,8 +277,9 @@ ui_print_header_line() {
     local color="${2:-$COLOR_WHITE}"
     local max_len="${3:-79}" # Inner width matches the 79 ═ characters
     
-    local text_len=${#text}
-    local cjk_count=$(echo -n "$text" | grep -o -P '[\p{Han}]' | wc -l)
+    local plain_text=$(echo -e "$text" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    local text_len=${#plain_text}
+    local cjk_count=$(echo -n "$plain_text" | grep -o -P '[\p{Han}]' | wc -l)
     text_len=$(( text_len + cjk_count ))
 
     local spaces_needed=$(( max_len - text_len ))
@@ -293,6 +294,24 @@ ui_print_header_line() {
     
     # We use COLOR_CYAN at the end to keep the box border color active for the next line
     echo -e "${COLOR_CYAN}║${COLOR_RESET}${pad_l}${color}${text}${COLOR_RESET}${pad_r}${COLOR_CYAN}║"
+}
+
+ui_print_left_header_line() {
+    local text="$1"
+    local color="${2:-$COLOR_WHITE}"
+    local max_len="${3:-79}"
+    
+    local plain_text=$(echo -e "$text" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    local text_len=${#plain_text}
+    local cjk_count=$(echo -n "$plain_text" | grep -o -P '[\p{Han}]' | wc -l)
+    text_len=$(( text_len + cjk_count ))
+
+    local spaces_needed=$(( max_len - text_len - 2 )) # 2 spaces for left padding
+    if [ $spaces_needed -lt 0 ]; then spaces_needed=0; fi
+    
+    local pad_r=$(printf '%*s' "$spaces_needed" "")
+    
+    echo -e "${COLOR_CYAN}║${COLOR_RESET}  ${color}${text}${COLOR_RESET}${pad_r}${COLOR_CYAN}║"
 }
 
 # Escolha inicial de idioma
@@ -339,22 +358,22 @@ ui_print_header_line "" "" 79
 echo -e "╠═══════════════════════════════════════════════════════════════════════════════╣"
 echo -e "${COLOR_RESET}"
 echo -e "${COLOR_YELLOW}${COLOR_BOLD}"
-echo -e "  ${LANG_DISCLAIMER_1:-O uso deste script é de INTEIRA RESPONSABILIDADE do utilizador.}"
+echo -e "  ${LANG_DISCLAIMER_1:-O uso deste script é de ${COLOR_RED}INTEIRA RESPONSABILIDADE${COLOR_YELLOW} do utilizador.}"
 echo -e "${COLOR_RESET}"
 echo ""
-echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_2_1:-A pessoa ou empresa que forneceu o script NÃO SERÁ RESPONSÁVEL}"
-echo -e "    ${LANG_DISCLAIMER_2_2:-por quaisquer problemas ou danos causados pelo uso do mesmo.}${COLOR_RESET}"
+echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_2_1:-A pessoa ou empresa que forneceu o script ${COLOR_RED}NÃO SERÁ RESPONSÁVEL${COLOR_WHITE}}"
+echo -e "    ${LANG_DISCLAIMER_2_2:-por quaisquer ${COLOR_RED}problemas ou danos causados${COLOR_WHITE} pelo uso do mesmo.}${COLOR_RESET}"
 echo ""
-echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_3_1:-Antes de utilizar, faça uma avaliação cuidadosa e compreenda}"
+echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_3_1:-Antes de utilizar, faça uma ${COLOR_GREEN}avaliação cuidadosa${COLOR_WHITE} e compreenda}"
 echo -e "    ${LANG_DISCLAIMER_3_2:-as implicações do seu uso.}${COLOR_RESET}"
 echo ""
-echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_4_1:-Certifique-se de que o script é seguro e adequado para}"
+echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_4_1:-${COLOR_RED}Certifique-se${COLOR_WHITE} de que o script é ${COLOR_GREEN}seguro e adequado${COLOR_WHITE} para}"
 echo -e "    ${LANG_DISCLAIMER_4_2:-as suas necessidades antes de utilizá-lo.}${COLOR_RESET}"
 echo ""
 echo -e "${COLOR_CYAN}${COLOR_BOLD}"
 echo -e "╠═══════════════════════════════════════════════════════════════════════════════╣"
 ui_print_header_line "" "" 79
-ui_print_header_line "➜  ${LANG_DISCLAIMER_AGREE:-Ao pressionar ENTER você CONCORDA com os termos acima}" "${COLOR_WHITE}" 79
+ui_print_left_header_line "${COLOR_YELLOW}➜${COLOR_CYAN}  ${LANG_DISCLAIMER_AGREE:-Ao pressionar ENTER você ${COLOR_RED}CONCORDA${COLOR_CYAN} com os termos acima}" "${COLOR_CYAN}" 79
 ui_print_header_line "" "" 79
 echo -e "╚═══════════════════════════════════════════════════════════════════════════════╝"
 echo -e "${COLOR_RESET}"
