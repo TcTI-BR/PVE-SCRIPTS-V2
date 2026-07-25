@@ -464,7 +464,7 @@ show_system_status() {
     echo -e "  ${COLOR_GRAY}─────────────────────────────────────────────────────────────────${COLOR_RESET}"
     
     # Custom alignment function for labels
-    local function print_status_line() {
+    print_status_line() {
         local icon="$1"
         local label="$2"
         local status="$3"
