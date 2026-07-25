@@ -225,6 +225,109 @@ hostname=$(hostname)
 date=$(date +%Y_%m_%d-%H_%M_%S)
 # ---------------FIM DAS VARIAVEIS DE SISTEMA-----------------
 
+# ============================================================
+# MOTOR GRÁFICO E MULTI-IDIOMA (i18n)
+# ============================================================
+LANG_CONFIG_FILE="$SCRIPT_DIR/.lang.cfg"
+
+# Função para preenchimento dinâmico de strings (Dynamic Padding)
+# Resolve o problema de alinhamento de bordas com idiomas diferentes (incluindo Chinês)
+ui_print_menu_item() {
+    local opt_num="$1"
+    local opt_text="$2"
+    local opt_color="${3:-$COLOR_YELLOW}"
+    local max_len="${4:-63}"
+    
+    # Contamos o tamanho visual do texto (Chinês ocupa 2 colunas visuais no bash para a maioria dos terminais)
+    local text_len=${#opt_text}
+    
+    local cjk_count=$(echo -n "$opt_text" | grep -o -P '[\p{Han}]' | wc -l)
+    text_len=$(( text_len + cjk_count ))
+
+    local fixed_len=7 # Espaços e setas: "  X ➜  "
+    local total_len=$(( fixed_len + text_len ))
+    local spaces_needed=$(( max_len - total_len ))
+    
+    if [ $spaces_needed -lt 0 ]; then spaces_needed=0; fi
+    local padding=$(printf '%*s' "$spaces_needed" "")
+    
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${opt_color}${opt_num}${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}${opt_text}${COLOR_RESET}${padding}${COLOR_CYAN}│${COLOR_RESET}"
+}
+
+ui_print_menu_desc() {
+    local opt_desc="$1"
+    local max_len="${2:-63}"
+    
+    local text_len=${#opt_desc}
+    local cjk_count=$(echo -n "$opt_desc" | grep -o -P '[\p{Han}]' | wc -l)
+    text_len=$(( text_len + cjk_count ))
+
+    local fixed_len=7 # Subtítulos recuados igual: "       "
+    local total_len=$(( fixed_len + text_len ))
+    local spaces_needed=$(( max_len - total_len ))
+    
+    if [ $spaces_needed -lt 0 ]; then spaces_needed=0; fi
+    local padding=$(printf '%*s' "$spaces_needed" "")
+    
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}       ${COLOR_GRAY}${opt_desc}${COLOR_RESET}${padding}${COLOR_CYAN}│${COLOR_RESET}"
+}
+
+ui_print_header_line() {
+    local text="$1"
+    local color="${2:-$COLOR_WHITE}"
+    local max_len="${3:-77}" # Length of inner content of the header (79 - 2 for borders)
+    
+    local text_len=${#text}
+    local cjk_count=$(echo -n "$text" | grep -o -P '[\p{Han}]' | wc -l)
+    text_len=$(( text_len + cjk_count ))
+
+    local spaces_needed=$(( max_len - text_len ))
+    if [ $spaces_needed -lt 0 ]; then spaces_needed=0; fi
+    
+    # Let's center it:
+    local left_pad=$(( spaces_needed / 2 ))
+    local right_pad=$(( spaces_needed - left_pad ))
+    
+    local pad_l=$(printf '%*s' "$left_pad" "")
+    local pad_r=$(printf '%*s' "$right_pad" "")
+    
+    echo -e "${COLOR_CYAN}║${COLOR_RESET}${pad_l}${color}${text}${COLOR_RESET}${pad_r}${COLOR_CYAN}║${COLOR_RESET}"
+}
+
+# Escolha inicial de idioma
+if [ ! -f "$LANG_CONFIG_FILE" ]; then
+    clear
+    echo -e "${COLOR_CYAN}╔══════════════════════════════════════════════════════════════════════════╗${COLOR_RESET}"
+    echo -e "${COLOR_CYAN}║${COLOR_RESET}  ${COLOR_YELLOW}Welcome! Please select your language / Por favor, selecione seu idioma${COLOR_RESET}  ${COLOR_CYAN}║${COLOR_RESET}"
+    echo -e "${COLOR_CYAN}╚══════════════════════════════════════════════════════════════════════════╝${COLOR_RESET}"
+    echo ""
+    echo "  1 ➜ 🇧🇷 Português (Brasil)"
+    echo "  2 ➜ 🇺🇸 English (US)"
+    echo "  3 ➜ 🇪🇸 Español (ES)"
+    echo "  4 ➜ 🇨🇳 简体中文 (Chinese)"
+    echo ""
+    echo -n "  Option / Opção: "
+    read -r lang_opt
+    case $lang_opt in
+        1) echo "LANG_FILE=pt_BR.sh" > "$LANG_CONFIG_FILE" ;;
+        2) echo "LANG_FILE=en_US.sh" > "$LANG_CONFIG_FILE" ;;
+        3) echo "LANG_FILE=es_ES.sh" > "$LANG_CONFIG_FILE" ;;
+        4) echo "LANG_FILE=zh_CN.sh" > "$LANG_CONFIG_FILE" ;;
+        *) echo "LANG_FILE=pt_BR.sh" > "$LANG_CONFIG_FILE" ;; # Fallback
+    esac
+fi
+
+# Carrega o idioma
+source "$LANG_CONFIG_FILE"
+if [ -f "$FUNCTIONS_DIR/lang/$LANG_FILE" ]; then
+    source "$FUNCTIONS_DIR/lang/$LANG_FILE"
+else
+    # Fallback silencioso
+    source "$FUNCTIONS_DIR/lang/pt_BR.sh" 2>/dev/null
+fi
+# ============================================================
+
+
 # Banner e verificação inicial modernos
 clear
 echo -e "${COLOR_CYAN}${COLOR_BOLD}"
@@ -276,67 +379,67 @@ fi
 # Painel de Status dos Serviços e Configurações
 show_system_status() {
     # 1. Backup de Configurações PVE
-    local st_bkp="${COLOR_RED}🔴 Não agendado${COLOR_RESET}"
+    local st_bkp="${COLOR_RED}🔴 ${LANG_ST_UNSCHEDULED:-Não agendado}${COLOR_RESET}"
     if crontab -l 2>/dev/null | grep -q "BKP-PVE" || [ -f "/TcTI/SCRIPTS/BKP-PVE/BKP-PVE.sh" ]; then
         if crontab -l 2>/dev/null | grep -q "BKP-PVE"; then
-            st_bkp="${COLOR_GREEN}🟢 Agendado (Cron)${COLOR_RESET}"
+            st_bkp="${COLOR_GREEN}🟢 ${LANG_ST_SCHED_CRON:-Agendado (Cron)}${COLOR_RESET}"
         else
-            st_bkp="${COLOR_YELLOW}🟡 Criado (sem Cron)${COLOR_RESET}"
+            st_bkp="${COLOR_YELLOW}🟡 ${LANG_ST_CREATED_NOCRON:-Criado (sem Cron)}${COLOR_RESET}"
         fi
     fi
 
     # 2. Monitoramento Térmico
-    local st_temp="${COLOR_RED}🔴 Não agendado${COLOR_RESET}"
+    local st_temp="${COLOR_RED}🔴 ${LANG_ST_UNSCHEDULED:-Não agendado}${COLOR_RESET}"
     if crontab -l 2>/dev/null | grep -q "pve_temp_monitor.py"; then
-        st_temp="${COLOR_GREEN}🟢 Ativo (Cron 2min)${COLOR_RESET}"
+        st_temp="${COLOR_GREEN}🟢 ${LANG_ST_ACTIVE_CRON2:-Ativo (Cron 2min)}${COLOR_RESET}"
     fi
 
     # 3. Sensores WebUI (PVE)
-    local st_webui_sensors="${COLOR_RED}🔴 Desativado${COLOR_RESET}"
+    local st_webui_sensors="${COLOR_RED}🔴 ${LANG_ST_DISABLED:-Desativado}${COLOR_RESET}"
     if grep -q "TCTI_SENSORS_MOD" /usr/share/perl5/PVE/API2/Nodes.pm 2>/dev/null; then
-        st_webui_sensors="${COLOR_GREEN}🟢 Ativado${COLOR_RESET}"
+        st_webui_sensors="${COLOR_GREEN}🟢 ${LANG_ST_ENABLED:-Ativado}${COLOR_RESET}"
     fi
 
     # 4. Auto-inicialização Shell
-    local st_autostart="${COLOR_RED}🔴 Desativado${COLOR_RESET}"
+    local st_autostart="${COLOR_RED}🔴 ${LANG_ST_DISABLED:-Desativado}${COLOR_RESET}"
     if [ -f "/etc/profile.d/tcti-proxmox-auto.sh" ]; then
-        st_autostart="${COLOR_GREEN}🟢 Ativado${COLOR_RESET}"
+        st_autostart="${COLOR_GREEN}🟢 ${LANG_ST_ENABLED:-Ativado}${COLOR_RESET}"
     fi
 
     # 5. Watchdog de VMs
-    local st_watchdog="${COLOR_RED}🔴 Inativo${COLOR_RESET}"
+    local st_watchdog="${COLOR_RED}🔴 ${LANG_ST_INACTIVE:-Inativo}${COLOR_RESET}"
     if crontab -l 2>/dev/null | grep -q "WATCHDOG" || [ -d "/TcTI/SCRIPTS/WATCHDOG" ]; then
         if crontab -l 2>/dev/null | grep -q "WATCHDOG"; then
-            st_watchdog="${COLOR_GREEN}🟢 Ativo (Cron)${COLOR_RESET}"
+            st_watchdog="${COLOR_GREEN}🟢 ${LANG_ST_ACTIVE_CRON:-Ativo (Cron)}${COLOR_RESET}"
         else
-            st_watchdog="${COLOR_YELLOW}🟡 Configurado${COLOR_RESET}"
+            st_watchdog="${COLOR_YELLOW}🟡 ${LANG_ST_CONFIGURED:-Configurado}${COLOR_RESET}"
         fi
     fi
 
     # 6. Bot Interativo Telegram
-    local st_tg_bot="${COLOR_RED}🔴 Inativo${COLOR_RESET}"
+    local st_tg_bot="${COLOR_RED}🔴 ${LANG_ST_INACTIVE:-Inativo}${COLOR_RESET}"
     if systemctl is-active pve-telegram-bot &>/dev/null; then
-        st_tg_bot="${COLOR_GREEN}🟢 Ativo (Rodando)${COLOR_RESET}"
+        st_tg_bot="${COLOR_GREEN}🟢 ${LANG_ST_ACTIVE_RUN:-Ativo (Rodando)}${COLOR_RESET}"
     elif [ -f "/TcTI/SCRIPTS/telegram/.env" ]; then
-        st_tg_bot="${COLOR_YELLOW}🟡 Configurado (Parado)${COLOR_RESET}"
+        st_tg_bot="${COLOR_YELLOW}🟡 ${LANG_ST_CONF_STOPPED:-Configurado (Parado)}${COLOR_RESET}"
     fi
 
     # 7. Notificações Telegram
-    local st_tg_notif="${COLOR_RED}🔴 Não configurado${COLOR_RESET}"
+    local st_tg_notif="${COLOR_RED}🔴 ${LANG_ST_UNCONFIGURED:-Não configurado}${COLOR_RESET}"
     if [ -f "/TcTI/SCRIPTS/telegram/.env_notificacoes" ]; then
         local NOTIF_SERVER_NAME=""
         source "/TcTI/SCRIPTS/telegram/.env_notificacoes" 2>/dev/null
-        st_tg_notif="${COLOR_GREEN}🟢 Configurado (${NOTIF_SERVER_NAME:-OK})${COLOR_RESET}"
+        st_tg_notif="${COLOR_GREEN}🟢 ${LANG_ST_CONFIGURED:-Configurado} (${NOTIF_SERVER_NAME:-OK})${COLOR_RESET}"
     fi
 
     # 8. Atualização Automática do Script
-    local st_update="${COLOR_GREEN}🟢 Ativada (Padrão)${COLOR_RESET}"
+    local st_update="${COLOR_GREEN}🟢 ${LANG_ST_ENABLED_DEF:-Ativada (Padrão)}${COLOR_RESET}"
     if [ -f "/TcTI/SCRIPTS/.no_auto_update" ] || [ -f "$SCRIPT_DIR/.no_auto_update" ]; then
-        st_update="${COLOR_RED}🔴 Desativada (Versão Fixa)${COLOR_RESET}"
+        st_update="${COLOR_RED}🔴 ${LANG_ST_DISABLED_FIX:-Desativada (Versão Fixa)}${COLOR_RESET}"
     fi
 
     # 9. Assistente de IA (Resumido em 1 linha única)
-    local st_ia="${COLOR_RED}🔴 Não configurada${COLOR_RESET}"
+    local st_ia="${COLOR_RED}🔴 ${LANG_ST_UNCONFIGURED_F:-Não configurada}${COLOR_RESET}"
     if [ -f "/root/.ai_config" ]; then
         local AI_PROVIDER="" AI_MODEL="" AI_KEY=""
         source /root/.ai_config 2>/dev/null
@@ -357,17 +460,37 @@ show_system_status() {
         st_ia="${COLOR_GREEN}🟢 OpenAI (gpt-4o-mini) | Key OK${COLOR_RESET}"
     fi
 
-    echo -e "  ${COLOR_CYAN}${COLOR_BOLD}📊 STATUS DOS SERVIÇOS E CONFIGURAÇÕES:${COLOR_RESET}"
+    echo -e "  ${COLOR_CYAN}${COLOR_BOLD}📊  ${LANG_MAIN_ST_TITLE:-STATUS DOS SERVIÇOS E CONFIGURAÇÕES:}${COLOR_RESET}"
     echo -e "  ${COLOR_GRAY}─────────────────────────────────────────────────────────────────${COLOR_RESET}"
-    echo -e "  ${COLOR_WHITE}📦  Backup Configs PVE   :${COLOR_RESET} ${st_bkp}"
-    echo -e "  ${COLOR_WHITE}🌡️  Monitor Temp (Cron)  :${COLOR_RESET} ${st_temp}"
-    echo -e "  ${COLOR_WHITE}💻  Sensores WebUI (PVE) :${COLOR_RESET} ${st_webui_sensors}"
-    echo -e "  ${COLOR_WHITE}🚀  Auto-Start Shell     :${COLOR_RESET} ${st_autostart}"
-    echo -e "  ${COLOR_WHITE}🐕  Watchdog de VMs      :${COLOR_RESET} ${st_watchdog}"
-    echo -e "  ${COLOR_WHITE}🤖  Bot Telegram (Inter) :${COLOR_RESET} ${st_tg_bot}"
-    echo -e "  ${COLOR_WHITE}📣  Notificação Telegram :${COLOR_RESET} ${st_tg_notif}"
-    echo -e "  ${COLOR_WHITE}🔄  Auto-Update Script   :${COLOR_RESET} ${st_update}"
-    echo -e "  ${COLOR_WHITE}🧙  Assistente de IA     :${COLOR_RESET} ${st_ia}"
+    
+    # Custom alignment function for labels
+    local function print_status_line() {
+        local icon="$1"
+        local label="$2"
+        local status="$3"
+        
+        # Max visual length for label column is 23 characters (e.g. "Backup Configs PVE   : ")
+        local cjk_count=$(echo -n "$label" | grep -o -P '[\p{Han}]' | wc -l)
+        local text_len=${#label}
+        text_len=$(( text_len + cjk_count ))
+        local max_len=23
+        local spaces_needed=$(( max_len - text_len ))
+        if [ $spaces_needed -lt 0 ]; then spaces_needed=0; fi
+        local padding=$(printf '%*s' "$spaces_needed" "")
+        
+        echo -e "  ${COLOR_WHITE}${icon}  ${label}${padding}:${COLOR_RESET} ${status}"
+    }
+
+    print_status_line "📦" "${LANG_MAIN_ST_BKP:-Backup Configs PVE}" "$st_bkp"
+    print_status_line "🌡️" "${LANG_MAIN_ST_TEMP:-Monitor Temp (Cron)}" "$st_temp"
+    print_status_line "💻" "${LANG_MAIN_ST_WEBUI:-Sensores WebUI (PVE)}" "$st_webui_sensors"
+    print_status_line "🚀" "${LANG_MAIN_ST_AUTOSTART:-Auto-Start Shell}" "$st_autostart"
+    print_status_line "🐕" "${LANG_MAIN_ST_WATCHDOG:-Watchdog de VMs}" "$st_watchdog"
+    print_status_line "🤖" "${LANG_MAIN_ST_TGBOT:-Bot Telegram (Inter)}" "$st_tg_bot"
+    print_status_line "📣" "${LANG_MAIN_ST_TGNOTIF:-Notificação Telegram}" "$st_tg_notif"
+    print_status_line "🔄" "${LANG_MAIN_ST_UPDATE:-Auto-Update Script}" "$st_update"
+    print_status_line "🧙" "${LANG_MAIN_ST_IA:-Assistente de IA}" "$st_ia"
+
     echo -e "  ${COLOR_GRAY}─────────────────────────────────────────────────────────────────${COLOR_RESET}"
     echo ""
 }
@@ -377,33 +500,46 @@ main_menu(){
     clear
     echo -e "${COLOR_CYAN}${COLOR_BOLD}"
     echo -e "╔═══════════════════════════════════════════════════════════════════════════════╗"
-    echo -e "║                                                                               ║"
-    echo -e "║               🚀  TcTI Proxmox Scripts - Menu Principal                        ║"
-    echo -e "║                      Versão: ${COLOR_YELLOW}$version${COLOR_CYAN}                                        ║"
-    echo -e "║                    Desenvolvido por: ${COLOR_WHITE}Marcelo Machado${COLOR_CYAN}                          ║"
-    echo -e "║                                                                               ║"
+    ui_print_header_line ""
+    ui_print_header_line "🚀  TcTI Proxmox Scripts - ${LANG_MAIN_TITLE:-Menu Principal}" "${COLOR_WHITE}"
+    ui_print_header_line "${LANG_MAIN_VERSION:-Versão:} ${version}" "${COLOR_YELLOW}"
+    ui_print_header_line "${LANG_MAIN_AUTHOR:-Desenvolvido por:} Marcelo Machado" "${COLOR_WHITE}"
+    ui_print_header_line ""
     echo -e "╚═══════════════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
     echo ""
     show_system_status
-    echo -e "${COLOR_BOLD}  Selecione uma opção:${COLOR_RESET}"
+    echo -e "${COLOR_BOLD}  ${LANG_SELECT_OPT:-Selecione uma opção:}${COLOR_RESET}"
     echo ""
     echo -e "  ${COLOR_CYAN}┌─────────────────────────────────────────────────────────────────┐${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}1${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Proxmox Virtual Environment (PVE)${COLOR_RESET}                         ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}       ${COLOR_GRAY}Gerenciamento completo do Proxmox VE${COLOR_RESET}                      ${COLOR_CYAN}│${COLOR_RESET}"
+    
+    ui_print_menu_item "1" "${LANG_MAIN_OPT_1}" "${COLOR_YELLOW}" 65
+    ui_print_menu_desc "${LANG_MAIN_DESC_1}" 65
+    
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}2${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Proxmox Backup Server (PBS)${COLOR_RESET}                               ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}       ${COLOR_GRAY}Gerenciamento do Proxmox Backup Server${COLOR_RESET}                    ${COLOR_CYAN}│${COLOR_RESET}"
+    
+    ui_print_menu_item "2" "${LANG_MAIN_OPT_2}" "${COLOR_YELLOW}" 65
+    ui_print_menu_desc "${LANG_MAIN_DESC_2}" 65
+    
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_YELLOW}3${COLOR_RESET} ${COLOR_GREEN}➜${COLOR_RESET}  ${COLOR_WHITE}Ferramentas Gerais e Extras${COLOR_RESET}                               ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}       ${COLOR_GRAY}Testes de disco, badblocks, SMART, etc.${COLOR_RESET}                   ${COLOR_CYAN}│${COLOR_RESET}"
+    
+    ui_print_menu_item "3" "${LANG_MAIN_OPT_3}" "${COLOR_YELLOW}" 65
+    ui_print_menu_desc "${LANG_MAIN_DESC_3}" 65
+    
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
-    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}  ${COLOR_RED}0${COLOR_RESET} ${COLOR_RED}➜${COLOR_RESET}  ${COLOR_WHITE}Sair${COLOR_RESET}                                                      ${COLOR_CYAN}│${COLOR_RESET}"
+    
+    ui_print_menu_item "4" "${LANG_MAIN_OPT_4}" "${COLOR_YELLOW}" 65
+    ui_print_menu_desc "${LANG_MAIN_DESC_4}" 65
+    
+    echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
+    
+    ui_print_menu_item "0" "${LANG_MAIN_OPT_0}" "${COLOR_RED}" 65
+    
     echo -e "  ${COLOR_CYAN}│${COLOR_RESET}                                                                 ${COLOR_CYAN}│${COLOR_RESET}"
     echo -e "  ${COLOR_CYAN}└─────────────────────────────────────────────────────────────────┘${COLOR_RESET}"
     echo ""
-    echo -e "${COLOR_YELLOW}  Digite sua opção ${COLOR_GRAY}(ou pressione ENTER para sair)${COLOR_YELLOW}: ${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}  ${LANG_TYPE_OPT:-Digite sua opção} ${COLOR_GRAY}${LANG_PRESS_ENTER:-(ou pressione ENTER para sair)}${COLOR_YELLOW}: ${COLOR_RESET}"
     read -rsn1 opt
 	while [ opt != '' ]
   do
@@ -419,6 +555,9 @@ main_menu(){
 			;;
 	    3) clear;
 		extras_menu
+			;;
+	    4) clear;
+		menu_config
 			;;
 		0)
 		clear
