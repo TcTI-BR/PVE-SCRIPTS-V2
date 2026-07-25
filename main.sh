@@ -122,11 +122,17 @@ run_updater() {
         if [ -n "$SOURCE_DIR" ] && [ -d "$SOURCE_DIR" ] && [ -f "$SOURCE_DIR/main.sh" ]; then
             echo -e "${COLOR_BLUE}${SYMBOL_LOADING} Aplicando atualização...${COLOR_RESET}"
             
-            # Garantir permissão de execução em arquivos sh
+            # Garantir permissão de execução em arquivos sh extraídos
             find "$SOURCE_DIR" -type f -name "*.sh" -exec chmod +x {} \;
             
-            # Copia os arquivos por cima (usando cp -a para preservar permissões)
-            cp -a "$SOURCE_DIR/"* "$SCRIPT_DIR/"
+            # Remove a pasta de funções antiga para garantir substituição limpa e remover arquivos legados
+            rm -rf "$SCRIPT_DIR/functions"
+            
+            # Copia a nova versão por cima (usando cp -rf para forçar substituição)
+            cp -rf "$SOURCE_DIR/"* "$SCRIPT_DIR/"
+            
+            # Garante permissões de execução no destino
+            find "$SCRIPT_DIR" -type f -name "*.sh" -exec chmod +x {} \;
             
             # Atualiza o hash local para não baixar novamente
             echo "$LATEST_COMMIT" > "$LOCAL_COMMIT_FILE"
