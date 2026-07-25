@@ -278,6 +278,8 @@ ui_print_header_line() {
     local max_len="${3:-79}" # Inner width matches the 79 ═ characters
     
     local plain_text=$(echo -e "$text" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    # Remove emoji variation selectors (U+FE0F) which are invisible but count as 1 char in bash
+    plain_text=$(echo "$plain_text" | sed $'s/\xEF\xB8\x8F//g')
     local text_len=${#plain_text}
     local cjk_count=$(echo -n "$plain_text" | grep -o -P '[\p{Han}]' | wc -l)
     text_len=$(( text_len + cjk_count ))
@@ -302,6 +304,8 @@ ui_print_left_header_line() {
     local max_len="${3:-79}"
     
     local plain_text=$(echo -e "$text" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    # Remove emoji variation selectors (U+FE0F) which are invisible but count as 1 char in bash
+    plain_text=$(echo "$plain_text" | sed $'s/\xEF\xB8\x8F//g')
     local text_len=${#plain_text}
     local cjk_count=$(echo -n "$plain_text" | grep -o -P '[\p{Han}]' | wc -l)
     text_len=$(( text_len + cjk_count ))
