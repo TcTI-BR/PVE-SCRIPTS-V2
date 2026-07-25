@@ -267,6 +267,98 @@ if [[ $(id -u) -ne 0 ]] ; then
     exit 1
 fi
 
+# Painel de Status dos Serviços e Configurações
+show_system_status() {
+    # 1. Backup de Configurações PVE
+    local st_bkp="${COLOR_RED}🔴 Não agendado${COLOR_RESET}"
+    if crontab -l 2>/dev/null | grep -q "BKP-PVE" || [ -f "/TcTI/SCRIPTS/BKP-PVE/BKP-PVE.sh" ]; then
+        if crontab -l 2>/dev/null | grep -q "BKP-PVE"; then
+            st_bkp="${COLOR_GREEN}🟢 Agendado (Cron)${COLOR_RESET}"
+        else
+            st_bkp="${COLOR_YELLOW}🟡 Criado (sem Cron)${COLOR_RESET}"
+        fi
+    fi
+
+    # 2. Monitoramento Térmico
+    local st_temp="${COLOR_RED}🔴 Não agendado${COLOR_RESET}"
+    if crontab -l 2>/dev/null | grep -q "pve_temp_monitor.py"; then
+        st_temp="${COLOR_GREEN}🟢 Ativo (Cron 2min)${COLOR_RESET}"
+    fi
+
+    # 3. Auto-inicialização Shell
+    local st_autostart="${COLOR_RED}🔴 Desativado${COLOR_RESET}"
+    if [ -f "/etc/profile.d/tcti-proxmox-auto.sh" ]; then
+        st_autostart="${COLOR_GREEN}🟢 Ativado${COLOR_RESET}"
+    fi
+
+    # 4. Watchdog de VMs
+    local st_watchdog="${COLOR_RED}🔴 Inativo${COLOR_RESET}"
+    if crontab -l 2>/dev/null | grep -q "WATCHDOG" || [ -d "/TcTI/SCRIPTS/WATCHDOG" ]; then
+        if crontab -l 2>/dev/null | grep -q "WATCHDOG"; then
+            st_watchdog="${COLOR_GREEN}🟢 Ativo (Cron)${COLOR_RESET}"
+        else
+            st_watchdog="${COLOR_YELLOW}🟡 Configurado${COLOR_RESET}"
+        fi
+    fi
+
+    # 5. Bot Interativo Telegram
+    local st_tg_bot="${COLOR_RED}🔴 Inativo${COLOR_RESET}"
+    if systemctl is-active pve-telegram-bot &>/dev/null; then
+        st_tg_bot="${COLOR_GREEN}🟢 Ativo (Rodando)${COLOR_RESET}"
+    elif [ -f "/TcTI/SCRIPTS/telegram/.env" ]; then
+        st_tg_bot="${COLOR_YELLOW}🟡 Configurado (Parado)${COLOR_RESET}"
+    fi
+
+    # 6. Notificações Telegram
+    local st_tg_notif="${COLOR_RED}🔴 Não configurado${COLOR_RESET}"
+    if [ -f "/TcTI/SCRIPTS/telegram/.env_notificacoes" ]; then
+        local NOTIF_SERVER_NAME=""
+        source "/TcTI/SCRIPTS/telegram/.env_notificacoes" 2>/dev/null
+        st_tg_notif="${COLOR_GREEN}🟢 Configurado (${NOTIF_SERVER_NAME:-OK})${COLOR_RESET}"
+    fi
+
+    # 7. Atualização Automática do Script
+    local st_update="${COLOR_GREEN}🟢 Ativada (Padrão)${COLOR_RESET}"
+    if [ -f "/TcTI/SCRIPTS/.no_auto_update" ] || [ -f "$SCRIPT_DIR/.no_auto_update" ]; then
+        st_update="${COLOR_RED}🔴 Desativada (Versão Fixa)${COLOR_RESET}"
+    fi
+
+    # 8. Assistente de IA (Resumido em 1 linha única)
+    local st_ia="${COLOR_RED}🔴 Não configurada${COLOR_RESET}"
+    if [ -f "/root/.ai_config" ]; then
+        local AI_PROVIDER="" AI_MODEL="" AI_KEY=""
+        source /root/.ai_config 2>/dev/null
+        local prov="IA"
+        case "$AI_PROVIDER" in
+            gemini) prov="Google Gemini" ;;
+            openai) prov="OpenAI" ;;
+            claude) prov="Claude" ;;
+            *) prov="${AI_PROVIDER:-IA}" ;;
+        esac
+        local mod="${AI_MODEL:-custom}"
+        if [ -n "$AI_KEY" ]; then
+            st_ia="${COLOR_GREEN}🟢 ${prov} (${mod}) | Key OK${COLOR_RESET}"
+        else
+            st_ia="${COLOR_YELLOW}🟡 ${prov} (${mod}) | Sem Key${COLOR_RESET}"
+        fi
+    elif [ -f "/root/.openai_key" ]; then
+        st_ia="${COLOR_GREEN}🟢 OpenAI (gpt-4o-mini) | Key OK${COLOR_RESET}"
+    fi
+
+    echo -e "  ${COLOR_CYAN}${COLOR_BOLD}📊 STATUS DOS SERVIÇOS E CONFIGURAÇÕES:${COLOR_RESET}"
+    echo -e "  ${COLOR_GRAY}─────────────────────────────────────────────────────────────────${COLOR_RESET}"
+    echo -e "  ${COLOR_WHITE}📦 Backup Configs PVE  :${COLOR_RESET} ${st_bkp}"
+    echo -e "  ${COLOR_WHITE}🌡️  Monitor Temp (Cron) :${COLOR_RESET} ${st_temp}"
+    echo -e "  ${COLOR_WHITE}🚀 Auto-Start Shell    :${COLOR_RESET} ${st_autostart}"
+    echo -e "  ${COLOR_WHITE}🐕 Watchdog de VMs     :${COLOR_RESET} ${st_watchdog}"
+    echo -e "  ${COLOR_WHITE}🤖 Bot Telegram (Inter):${COLOR_RESET} ${st_tg_bot}"
+    echo -e "  ${COLOR_WHITE}📣 Notificação Telegram:${COLOR_RESET} ${st_tg_notif}"
+    echo -e "  ${COLOR_WHITE}🔄 Auto-Update Script  :${COLOR_RESET} ${st_update}"
+    echo -e "  ${COLOR_WHITE}🧙 Assistente de IA    :${COLOR_RESET} ${st_ia}"
+    echo -e "  ${COLOR_GRAY}─────────────────────────────────────────────────────────────────${COLOR_RESET}"
+    echo ""
+}
+
 # Menu Principal Moderno
 main_menu(){
     clear
@@ -280,6 +372,7 @@ main_menu(){
     echo -e "╚═══════════════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
     echo ""
+    show_system_status
     echo -e "${COLOR_BOLD}  Selecione uma opção:${COLOR_RESET}"
     echo ""
     echo -e "  ${COLOR_CYAN}┌─────────────────────────────────────────────────────────────────┐${COLOR_RESET}"
