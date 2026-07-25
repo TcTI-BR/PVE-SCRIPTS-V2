@@ -291,13 +291,19 @@ show_system_status() {
         st_temp="${COLOR_GREEN}🟢 Ativo (Cron 2min)${COLOR_RESET}"
     fi
 
-    # 3. Auto-inicialização Shell
+    # 3. Sensores WebUI (PVE)
+    local st_webui_sensors="${COLOR_RED}🔴 Desativado${COLOR_RESET}"
+    if grep -q "TCTI_SENSORS_MOD" /usr/share/perl5/PVE/API2/Nodes.pm 2>/dev/null; then
+        st_webui_sensors="${COLOR_GREEN}🟢 Ativado${COLOR_RESET}"
+    fi
+
+    # 4. Auto-inicialização Shell
     local st_autostart="${COLOR_RED}🔴 Desativado${COLOR_RESET}"
     if [ -f "/etc/profile.d/tcti-proxmox-auto.sh" ]; then
         st_autostart="${COLOR_GREEN}🟢 Ativado${COLOR_RESET}"
     fi
 
-    # 4. Watchdog de VMs
+    # 5. Watchdog de VMs
     local st_watchdog="${COLOR_RED}🔴 Inativo${COLOR_RESET}"
     if crontab -l 2>/dev/null | grep -q "WATCHDOG" || [ -d "/TcTI/SCRIPTS/WATCHDOG" ]; then
         if crontab -l 2>/dev/null | grep -q "WATCHDOG"; then
@@ -307,7 +313,7 @@ show_system_status() {
         fi
     fi
 
-    # 5. Bot Interativo Telegram
+    # 6. Bot Interativo Telegram
     local st_tg_bot="${COLOR_RED}🔴 Inativo${COLOR_RESET}"
     if systemctl is-active pve-telegram-bot &>/dev/null; then
         st_tg_bot="${COLOR_GREEN}🟢 Ativo (Rodando)${COLOR_RESET}"
@@ -315,7 +321,7 @@ show_system_status() {
         st_tg_bot="${COLOR_YELLOW}🟡 Configurado (Parado)${COLOR_RESET}"
     fi
 
-    # 6. Notificações Telegram
+    # 7. Notificações Telegram
     local st_tg_notif="${COLOR_RED}🔴 Não configurado${COLOR_RESET}"
     if [ -f "/TcTI/SCRIPTS/telegram/.env_notificacoes" ]; then
         local NOTIF_SERVER_NAME=""
@@ -323,13 +329,13 @@ show_system_status() {
         st_tg_notif="${COLOR_GREEN}🟢 Configurado (${NOTIF_SERVER_NAME:-OK})${COLOR_RESET}"
     fi
 
-    # 7. Atualização Automática do Script
+    # 8. Atualização Automática do Script
     local st_update="${COLOR_GREEN}🟢 Ativada (Padrão)${COLOR_RESET}"
     if [ -f "/TcTI/SCRIPTS/.no_auto_update" ] || [ -f "$SCRIPT_DIR/.no_auto_update" ]; then
         st_update="${COLOR_RED}🔴 Desativada (Versão Fixa)${COLOR_RESET}"
     fi
 
-    # 8. Assistente de IA (Resumido em 1 linha única)
+    # 9. Assistente de IA (Resumido em 1 linha única)
     local st_ia="${COLOR_RED}🔴 Não configurada${COLOR_RESET}"
     if [ -f "/root/.ai_config" ]; then
         local AI_PROVIDER="" AI_MODEL="" AI_KEY=""
@@ -355,6 +361,7 @@ show_system_status() {
     echo -e "  ${COLOR_GRAY}─────────────────────────────────────────────────────────────────${COLOR_RESET}"
     echo -e "  ${COLOR_WHITE}📦  Backup Configs PVE   :${COLOR_RESET} ${st_bkp}"
     echo -e "  ${COLOR_WHITE}🌡️  Monitor Temp (Cron)  :${COLOR_RESET} ${st_temp}"
+    echo -e "  ${COLOR_WHITE}💻  Sensores WebUI (PVE) :${COLOR_RESET} ${st_webui_sensors}"
     echo -e "  ${COLOR_WHITE}🚀  Auto-Start Shell     :${COLOR_RESET} ${st_autostart}"
     echo -e "  ${COLOR_WHITE}🐕  Watchdog de VMs      :${COLOR_RESET} ${st_watchdog}"
     echo -e "  ${COLOR_WHITE}🤖  Bot Telegram (Inter) :${COLOR_RESET} ${st_tg_bot}"
