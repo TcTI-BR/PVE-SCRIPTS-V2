@@ -275,7 +275,7 @@ ui_print_menu_desc() {
 ui_print_header_line() {
     local text="$1"
     local color="${2:-$COLOR_WHITE}"
-    local max_len="${3:-77}" # Length of inner content of the header (79 - 2 for borders)
+    local max_len="${3:-79}" # Inner width matches the 79 ═ characters
     
     local text_len=${#text}
     local cjk_count=$(echo -n "$text" | grep -o -P '[\p{Han}]' | wc -l)
@@ -291,7 +291,8 @@ ui_print_header_line() {
     local pad_l=$(printf '%*s' "$left_pad" "")
     local pad_r=$(printf '%*s' "$right_pad" "")
     
-    echo -e "${COLOR_CYAN}║${COLOR_RESET}${pad_l}${color}${text}${COLOR_RESET}${pad_r}${COLOR_CYAN}║${COLOR_RESET}"
+    # We use COLOR_CYAN at the end to keep the box border color active for the next line
+    echo -e "${COLOR_CYAN}║${COLOR_RESET}${pad_l}${color}${text}${COLOR_RESET}${pad_r}${COLOR_CYAN}║"
 }
 
 # Escolha inicial de idioma
