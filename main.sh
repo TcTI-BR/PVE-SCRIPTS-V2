@@ -53,6 +53,14 @@ run_updater() {
     echo -e "╚════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
     
+    # Verifica se atualização automática foi desativada pelo usuário/empresa
+    if [ -f "/TcTI/SCRIPTS/.no_auto_update" ] || [ -f "$SCRIPT_DIR/.no_auto_update" ]; then
+        echo -e "${COLOR_YELLOW}⚠️  Atualização automática desativada nas configurações.${COLOR_RESET}"
+        echo -e "${COLOR_GRAY}   Iniciando com a versão local.${COLOR_RESET}"
+        sleep 1
+        return 0
+    fi
+
     mkdir -p "$FUNCTIONS_DIR/pve"
     mkdir -p "$FUNCTIONS_DIR/pbs"
     mkdir -p "$FUNCTIONS_DIR/extras"
