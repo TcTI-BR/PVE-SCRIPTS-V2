@@ -333,29 +333,29 @@ fi
 clear
 echo -e "${COLOR_CYAN}${COLOR_BOLD}"
 echo -e "╔═══════════════════════════════════════════════════════════════════════════════╗"
-echo -e "║                                                                               ║"
-echo -e "║                    ⚠️  AVISO DE RESPONSABILIDADE  ⚠️                            ║"
-echo -e "║                                                                               ║"
+ui_print_header_line "" "" 79
+ui_print_header_line "⚠️  ${LANG_DISCLAIMER_TITLE:-AVISO DE RESPONSABILIDADE}  ⚠️" "${COLOR_YELLOW}" 79
+ui_print_header_line "" "" 79
 echo -e "╠═══════════════════════════════════════════════════════════════════════════════╣"
 echo -e "${COLOR_RESET}"
 echo -e "${COLOR_YELLOW}${COLOR_BOLD}"
-echo -e "  O uso deste script é de ${COLOR_RED}INTEIRA RESPONSABILIDADE${COLOR_YELLOW} do utilizador."
+echo -e "  ${LANG_DISCLAIMER_1:-O uso deste script é de INTEIRA RESPONSABILIDADE do utilizador.}"
 echo -e "${COLOR_RESET}"
 echo ""
-echo -e "${COLOR_WHITE}  • A pessoa ou empresa que forneceu o script ${COLOR_RED}NÃO SERÁ RESPONSÁVEL${COLOR_WHITE}"
-echo -e "    por quaisquer ${COLOR_RED}problemas ou danos causados${COLOR_WHITE} pelo uso do mesmo.${COLOR_RESET}"
+echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_2_1:-A pessoa ou empresa que forneceu o script NÃO SERÁ RESPONSÁVEL}"
+echo -e "    ${LANG_DISCLAIMER_2_2:-por quaisquer problemas ou danos causados pelo uso do mesmo.}${COLOR_RESET}"
 echo ""
-echo -e "${COLOR_WHITE}  • Antes de utilizar, faça uma ${COLOR_GREEN}avaliação cuidadosa${COLOR_WHITE} e compreenda"
-echo -e "    as implicações do seu uso.${COLOR_RESET}"
+echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_3_1:-Antes de utilizar, faça uma avaliação cuidadosa e compreenda}"
+echo -e "    ${LANG_DISCLAIMER_3_2:-as implicações do seu uso.}${COLOR_RESET}"
 echo ""
-echo -e "${COLOR_WHITE}  • ${COLOR_RED}Certifique-se${COLOR_WHITE} de que o script é ${COLOR_GREEN}seguro e adequado${COLOR_WHITE} para"
-echo -e "    as suas necessidades antes de utilizá-lo.${COLOR_RESET}"
+echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_4_1:-Certifique-se de que o script é seguro e adequado para}"
+echo -e "    ${LANG_DISCLAIMER_4_2:-as suas necessidades antes de utilizá-lo.}${COLOR_RESET}"
 echo ""
 echo -e "${COLOR_CYAN}${COLOR_BOLD}"
 echo -e "╠═══════════════════════════════════════════════════════════════════════════════╣"
-echo -e "║                                                                               ║"
-echo -e "║  ${COLOR_YELLOW}➜${COLOR_CYAN}  Ao pressionar ENTER você ${COLOR_RED}CONCORDA${COLOR_CYAN} com os termos acima                     ║"
-echo -e "║                                                                               ║"
+ui_print_header_line "" "" 79
+ui_print_header_line "➜  ${LANG_DISCLAIMER_AGREE:-Ao pressionar ENTER você CONCORDA com os termos acima}" "${COLOR_WHITE}" 79
+ui_print_header_line "" "" 79
 echo -e "╚═══════════════════════════════════════════════════════════════════════════════╝"
 echo -e "${COLOR_RESET}"
 read -p ""
