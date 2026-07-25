@@ -446,6 +446,91 @@ date=$(date +%Y_%m_%d-%H_%M_%S)
 # Banner e verificação inicial modernos
 clear
 echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+echo -e "╔═══════════════════════════════════════════════════════════════════════════════╗"
+ui_print_header_line "" "" 79
+ui_print_header_line "⚠️  ${LANG_DISCLAIMER_TITLE:-AVISO DE RESPONSABILIDADE}  ⚠️" "${COLOR_YELLOW}" 79
+ui_print_header_line "" "" 79
+echo -e "╠═══════════════════════════════════════════════════════════════════════════════╣"
+echo -e "${COLOR_RESET}"
+echo -e "${COLOR_YELLOW}${COLOR_BOLD}"
+echo -e "  ${LANG_DISCLAIMER_1:-O uso deste script é de ${COLOR_RED}INTEIRA RESPONSABILIDADE${COLOR_YELLOW} do utilizador.}"
+echo -e "${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_2_1:-A pessoa ou empresa que forneceu o script ${COLOR_RED}NÃO SERÁ RESPONSÁVEL${COLOR_WHITE}}"
+echo -e "    ${LANG_DISCLAIMER_2_2:-por quaisquer ${COLOR_RED}problemas ou danos causados${COLOR_WHITE} pelo uso do mesmo.}${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_3_1:-Antes de utilizar, faça uma ${COLOR_GREEN}avaliação cuidadosa${COLOR_WHITE} e compreenda}"
+echo -e "    ${LANG_DISCLAIMER_3_2:-as implicações do seu uso.}${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_WHITE}  • ${LANG_DISCLAIMER_4_1:-${COLOR_RED}Certifique-se${COLOR_WHITE} de que o script é ${COLOR_GREEN}seguro e adequado${COLOR_WHITE} para}"
+echo -e "    ${LANG_DISCLAIMER_4_2:-as suas necessidades antes de utilizá-lo.}${COLOR_RESET}"
+echo ""
+echo -e "${COLOR_CYAN}${COLOR_BOLD}"
+echo -e "╠═══════════════════════════════════════════════════════════════════════════════╣"
+ui_print_header_line "" "" 79
+ui_print_left_header_line "${COLOR_YELLOW}➜${COLOR_CYAN}  ${LANG_DISCLAIMER_AGREE:-Ao pressionar ENTER você ${COLOR_RED}CONCORDA${COLOR_CYAN} com os termos acima}" "${COLOR_CYAN}" 79
+ui_print_header_line "" "" 79
+echo -e "╚═══════════════════════════════════════════════════════════════════════════════╝"
+echo -e "${COLOR_RESET}"
+read -p ""
+clear
+
+# Verificando se é root com visual moderno
+if [[ $(id -u) -ne 0 ]] ; then 
+    echo -e "${COLOR_RED}${COLOR_BOLD}"
+    echo -e "╔═══════════════════════════════════════════════════════════════╗"
+    echo -e "║                                                               ║"
+    echo -e "║  ✗ ERRO: Este script precisa ser executado como ROOT         ║"
+    echo -e "║                                                               ║"
+    echo -e "║  Por favor execute com:                                       ║"
+    echo -e "║    • sudo ./main.sh                                           ║"
+    echo -e "║    • su - (e depois execute ./main.sh)                        ║"
+    echo -e "║                                                               ║"
+    echo -e "╚═══════════════════════════════════════════════════════════════╝"
+    echo -e "${COLOR_RESET}"
+    exit 1
+fi
+
+# Painel de Status dos Serviços e Configurações
+show_system_status() {
+    # 1. Backup de Configurações PVE
+    local st_bkp="${COLOR_RED}🔴 ${LANG_ST_UNSCHEDULED:-Não agendado}${COLOR_RESET}"
+    if crontab -l 2>/dev/null | grep -q "BKP-PVE" || [ -f "/TcTI/SCRIPTS/BKP-PVE/BKP-PVE.sh" ]; then
+        if crontab -l 2>/dev/null | grep -q "BKP-PVE"; then
+            st_bkp="${COLOR_GREEN}🟢 ${LANG_ST_SCHED_CRON:-Agendado (Cron)}${COLOR_RESET}"
+        else
+            st_bkp="${COLOR_YELLOW}🟡 ${LANG_ST_CREATED_NOCRON:-Criado (sem Cron)}${COLOR_RESET}"
+        fi
+    fi
+
+    # 2. Monitoramento Térmico
+    local st_temp="${COLOR_RED}🔴 ${LANG_ST_UNSCHEDULED:-Não agendado}${COLOR_RESET}"
+    if crontab -l 2>/dev/null | grep -q "pve_temp_monitor.py"; then
+        st_temp="${COLOR_GREEN}🟢 ${LANG_ST_ACTIVE_CRON2:-Ativo (Cron 2min)}${COLOR_RESET}"
+    fi
+
+    # 3. Sensores WebUI (PVE)
+    local st_webui_sensors="${COLOR_RED}🔴 ${LANG_ST_DISABLED:-Desativado}${COLOR_RESET}"
+    if grep -q "TCTI_SENSORS_MOD" /usr/share/perl5/PVE/API2/Nodes.pm 2>/dev/null; then
+        st_webui_sensors="${COLOR_GREEN}🟢 ${LANG_ST_ENABLED:-Ativado}${COLOR_RESET}"
+    fi
+
+    # 4. Auto-inicialização Shell
+    local st_autostart="${COLOR_RED}🔴 ${LANG_ST_DISABLED:-Desativado}${COLOR_RESET}"
+    if [ -f "/etc/profile.d/tcti-proxmox-auto.sh" ]; then
+        st_autostart="${COLOR_GREEN}🟢 ${LANG_ST_ENABLED:-Ativado}${COLOR_RESET}"
+    fi
+
+    # 5. Watchdog de VMs
+    local st_watchdog="${COLOR_RED}🔴 ${LANG_ST_INACTIVE:-Inativo}${COLOR_RESET}"
+    if crontab -l 2>/dev/null | grep -q "WATCHDOG" || [ -d "/TcTI/SCRIPTS/WATCHDOG" ]; then
+        if crontab -l 2>/dev/null | grep -q "WATCHDOG"; then
+            st_watchdog="${COLOR_GREEN}🟢 ${LANG_ST_ACTIVE_CRON:-Ativo (Cron)}${COLOR_RESET}"
+        else
+            st_watchdog="${COLOR_YELLOW}🟡 ${LANG_ST_CONFIGURED:-Configurado}${COLOR_RESET}"
+        fi
+    fi
+
     # 6. Bot Interativo Telegram
     local st_tg_bot="${COLOR_RED}🔴 ${LANG_ST_INACTIVE:-Inativo}${COLOR_RESET}"
     if systemctl is-active pve-telegram-bot &>/dev/null; then
