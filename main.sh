@@ -522,7 +522,7 @@ show_system_status() {
 
     # 4. Auto-inicialização Shell
     local st_autostart="${COLOR_RED}🔴  ${LANG_ST_DISABLED:-Desativado}${COLOR_RESET}"
-    if [ -f "/etc/profile.d/tcti-proxmox-auto.sh" ]; then
+    if [ -f "/etc/profile.d/proxmox-ini.sh" ]; then
         st_autostart="${COLOR_GREEN}🟢  ${LANG_ST_ENABLED:-Ativado}${COLOR_RESET}"
     fi
 
