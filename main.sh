@@ -263,7 +263,7 @@ run_updater() {
     clear
     echo -e "${COLOR_CYAN}${COLOR_BOLD}"
     echo -e "╔════════════════════════════════════════════════════════════════════╗"
-    echo -e "║           🚀 ${LANG_UPD_TITLE:-TcTI Proxmox Scripts - Sistema de Atualização}          ║"
+    ui_print_header_line "🚀 ${LANG_UPD_TITLE:-TcTI Proxmox Scripts - Sistema de Atualização}" "${COLOR_WHITE}" 68
     echo -e "╚════════════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
     
@@ -479,13 +479,13 @@ clear
 if [[ $(id -u) -ne 0 ]] ; then 
     echo -e "${COLOR_RED}${COLOR_BOLD}"
     echo -e "╔═══════════════════════════════════════════════════════════════╗"
-    echo -e "║                                                               ║"
+    ui_print_header_line "" "" 63
     echo -e "║  ✗ ERRO: Este script precisa ser executado como ROOT         ║"
-    echo -e "║                                                               ║"
+    ui_print_header_line "" "" 63
     echo -e "║  Por favor execute com:                                       ║"
     echo -e "║    • sudo ./main.sh                                           ║"
     echo -e "║    • su - (e depois execute ./main.sh)                        ║"
-    echo -e "║                                                               ║"
+    ui_print_header_line "" "" 63
     echo -e "╚═══════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
     exit 1
