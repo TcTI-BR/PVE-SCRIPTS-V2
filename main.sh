@@ -11,7 +11,6 @@ version=V003.R002
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Remove script antigo da inicialização (versão anterior)
-rm -f /etc/profile.d/proxmox-ini.sh 2>/dev/null
 rm -f /TcTI/SCRIPTS/proxmox-conf.sh 2>/dev/null
 rm -f /TcTI/SCRIPTS/proxmox-ini.sh 2>/dev/null
 
