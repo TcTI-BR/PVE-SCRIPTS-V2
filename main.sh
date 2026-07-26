@@ -145,10 +145,11 @@ ui_print_menu_item() {
     local opt_color="${3:-$COLOR_YELLOW}"
     local max_len="${4:-63}"
     
-    # Contamos o tamanho visual do texto (Chinês ocupa 2 colunas visuais no bash para a maioria dos terminais)
-    local text_len=${#opt_text}
+    local plain_text=$(echo -e "$opt_text" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    plain_text=$(echo "$plain_text" | sed $'s/\xEF\xB8\x8F//g')
+    local text_len=${#plain_text}
     
-    local cjk_count=$(echo -n "$opt_text" | grep -o -P '[\p{Han}]' | wc -l)
+    local cjk_count=$(echo -n "$plain_text" | grep -o -P '[\p{Han}]' | wc -l)
     text_len=$(( text_len + cjk_count ))
 
     local fixed_len=7 # Espaços e setas: "  X ➜  "
@@ -165,8 +166,11 @@ ui_print_menu_desc() {
     local opt_desc="$1"
     local max_len="${2:-63}"
     
-    local text_len=${#opt_desc}
-    local cjk_count=$(echo -n "$opt_desc" | grep -o -P '[\p{Han}]' | wc -l)
+    local plain_text=$(echo -e "$opt_desc" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    plain_text=$(echo "$plain_text" | sed $'s/\xEF\xB8\x8F//g')
+    local text_len=${#plain_text}
+    
+    local cjk_count=$(echo -n "$plain_text" | grep -o -P '[\p{Han}]' | wc -l)
     text_len=$(( text_len + cjk_count ))
 
     local fixed_len=7 # Subtítulos recuados igual: "       "
@@ -229,15 +233,15 @@ ui_print_left_header_line() {
 if [ ! -f "$LANG_CONFIG_FILE" ]; then
     clear
     echo -e "${COLOR_CYAN}╔══════════════════════════════════════════════════════════════════════════╗${COLOR_RESET}"
-    echo -e "${COLOR_CYAN}║${COLOR_RESET}  ${COLOR_YELLOW}Welcome! Please select your language / Por favor, selecione seu idioma${COLOR_RESET}  ${COLOR_CYAN}║${COLOR_RESET}"
+echo -e  "${LANG_AUTO_MAIN_1:-${COLOR_CYAN}║${COLOR_RESET}  ${COLOR_YELLOW}Welcome! Please select your language / Por favor, selecione seu idioma${COLOR_RESET}  ${COLOR_CYAN}║${COLOR_RESET}}"
     echo -e "${COLOR_CYAN}╚══════════════════════════════════════════════════════════════════════════╝${COLOR_RESET}"
     echo ""
-    echo "  1 ➜ 🇧🇷 Português (Brasil)"
-    echo "  2 ➜ 🇺🇸 English (US)"
-    echo "  3 ➜ 🇪🇸 Español (ES)"
-    echo "  4 ➜ 🇨🇳 简体中文 (Chinese)"
+echo "${LANG_AUTO_MAIN_2:-  1 ➜ 🇧🇷 Português (Brasil)}"
+echo "${LANG_AUTO_MAIN_3:-  2 ➜ 🇺🇸 English (US)}"
+echo "${LANG_AUTO_MAIN_4:-  3 ➜ 🇪🇸 Español (ES)}"
+echo "${LANG_AUTO_MAIN_5:-  4 ➜ 🇨🇳 简体中文 (Chinese)}"
     echo ""
-    echo -n "  Option / Opção: "
+echo -n  "${LANG_AUTO_MAIN_6:-  Option / Opção: }"
     read -r lang_opt
     case $lang_opt in
         1) echo "LANG_FILE=pt_BR.sh" > "$LANG_CONFIG_FILE" ;;
@@ -249,6 +253,7 @@ if [ ! -f "$LANG_CONFIG_FILE" ]; then
 fi
 
 # Carrega o idioma
+set -a
 source "$LANG_CONFIG_FILE"
 if [ -f "$FUNCTIONS_DIR/lang/$LANG_FILE" ]; then
     source "$FUNCTIONS_DIR/lang/$LANG_FILE"
@@ -256,6 +261,7 @@ else
     # Fallback silencioso
     source "$FUNCTIONS_DIR/lang/pt_BR.sh" 2>/dev/null
 fi
+set +a
 # ============================================================
 
 
@@ -269,8 +275,8 @@ run_updater() {
     
     # Verifica se atualização automática foi desativada pelo usuário/empresa
     if [ -f "/TcTI/SCRIPTS/.no_auto_update" ] || [ -f "$SCRIPT_DIR/.no_auto_update" ]; then
-        echo -e "${COLOR_YELLOW}⚠️  Atualização automática desativada nas configurações.${COLOR_RESET}"
-        echo -e "${COLOR_GRAY}   Iniciando com a versão local.${COLOR_RESET}"
+echo -e  "${LANG_AUTO_MAIN_7:-${COLOR_YELLOW}⚠️  Atualização automática desativada nas configurações.${COLOR_RESET}}"
+echo -e  "${LANG_AUTO_MAIN_8:-${COLOR_GRAY}   Iniciando com a versão local.${COLOR_RESET}}"
         sleep 1
         return 0
     fi
@@ -283,7 +289,7 @@ run_updater() {
     
     # Teste rápido de conexão
     if ! curl -s --connect-timeout 3 https://github.com > /dev/null; then
-        echo -e "${COLOR_YELLOW}⚠️  Modo Offline: Sem conexão. Iniciando com a versão local.${COLOR_RESET}"
+echo -e  "${LANG_AUTO_MAIN_9:-${COLOR_YELLOW}⚠️  Modo Offline: Sem conexão. Iniciando com a versão local.${COLOR_RESET}}"
         sleep 2
         return 0
     fi
@@ -480,11 +486,11 @@ if [[ $(id -u) -ne 0 ]] ; then
     echo -e "${COLOR_RED}${COLOR_BOLD}"
     echo -e "╔═══════════════════════════════════════════════════════════════╗"
     ui_print_header_line "" "" 63
-    echo -e "║  ✗ ERRO: Este script precisa ser executado como ROOT         ║"
+echo -e  "${LANG_AUTO_MAIN_10:-║  ✗ ERRO: Este script precisa ser executado como ROOT         ║}"
     ui_print_header_line "" "" 63
-    echo -e "║  Por favor execute com:                                       ║"
-    echo -e "║    • sudo ./main.sh                                           ║"
-    echo -e "║    • su - (e depois execute ./main.sh)                        ║"
+echo -e  "${LANG_AUTO_MAIN_11:-║  Por favor execute com:                                       ║}"
+echo -e  "${LANG_AUTO_MAIN_12:-║    • sudo ./main.sh                                           ║}"
+echo -e  "${LANG_AUTO_MAIN_13:-║    • su - (e depois execute ./main.sh)                        ║}"
     ui_print_header_line "" "" 63
     echo -e "╚═══════════════════════════════════════════════════════════════╝"
     echo -e "${COLOR_RESET}"
@@ -494,67 +500,67 @@ fi
 # Painel de Status dos Serviços e Configurações
 show_system_status() {
     # 1. Backup de Configurações PVE
-    local st_bkp="${COLOR_RED}🔴 ${LANG_ST_UNSCHEDULED:-Não agendado}${COLOR_RESET}"
+    local st_bkp="${COLOR_RED}🔴  ${LANG_ST_UNSCHEDULED:-Não agendado}${COLOR_RESET}"
     if crontab -l 2>/dev/null | grep -q "BKP-PVE" || [ -f "/TcTI/SCRIPTS/BKP-PVE/BKP-PVE.sh" ]; then
         if crontab -l 2>/dev/null | grep -q "BKP-PVE"; then
-            st_bkp="${COLOR_GREEN}🟢 ${LANG_ST_SCHED_CRON:-Agendado (Cron)}${COLOR_RESET}"
+            st_bkp="${COLOR_GREEN}🟢  ${LANG_ST_SCHED_CRON:-Agendado (Cron)}${COLOR_RESET}"
         else
-            st_bkp="${COLOR_YELLOW}🟡 ${LANG_ST_CREATED_NOCRON:-Criado (sem Cron)}${COLOR_RESET}"
+            st_bkp="${COLOR_YELLOW}🟡  ${LANG_ST_CREATED_NOCRON:-Criado (sem Cron)}${COLOR_RESET}"
         fi
     fi
 
     # 2. Monitoramento Térmico
-    local st_temp="${COLOR_RED}🔴 ${LANG_ST_UNSCHEDULED:-Não agendado}${COLOR_RESET}"
+    local st_temp="${COLOR_RED}🔴  ${LANG_ST_UNSCHEDULED:-Não agendado}${COLOR_RESET}"
     if crontab -l 2>/dev/null | grep -q "pve_temp_monitor.py"; then
-        st_temp="${COLOR_GREEN}🟢 ${LANG_ST_ACTIVE_CRON2:-Ativo (Cron 2min)}${COLOR_RESET}"
+        st_temp="${COLOR_GREEN}🟢  ${LANG_ST_ACTIVE_CRON2:-Ativo (Cron 2min)}${COLOR_RESET}"
     fi
 
     # 3. Sensores WebUI (PVE)
-    local st_webui_sensors="${COLOR_RED}🔴 ${LANG_ST_DISABLED:-Desativado}${COLOR_RESET}"
+    local st_webui_sensors="${COLOR_RED}🔴  ${LANG_ST_DISABLED:-Desativado}${COLOR_RESET}"
     if grep -q "TCTI_SENSORS_MOD" /usr/share/perl5/PVE/API2/Nodes.pm 2>/dev/null; then
-        st_webui_sensors="${COLOR_GREEN}🟢 ${LANG_ST_ENABLED:-Ativado}${COLOR_RESET}"
+        st_webui_sensors="${COLOR_GREEN}🟢  ${LANG_ST_ENABLED:-Ativado}${COLOR_RESET}"
     fi
 
     # 4. Auto-inicialização Shell
-    local st_autostart="${COLOR_RED}🔴 ${LANG_ST_DISABLED:-Desativado}${COLOR_RESET}"
+    local st_autostart="${COLOR_RED}🔴  ${LANG_ST_DISABLED:-Desativado}${COLOR_RESET}"
     if [ -f "/etc/profile.d/tcti-proxmox-auto.sh" ]; then
-        st_autostart="${COLOR_GREEN}🟢 ${LANG_ST_ENABLED:-Ativado}${COLOR_RESET}"
+        st_autostart="${COLOR_GREEN}🟢  ${LANG_ST_ENABLED:-Ativado}${COLOR_RESET}"
     fi
 
     # 5. Watchdog de VMs
-    local st_watchdog="${COLOR_RED}🔴 ${LANG_ST_INACTIVE:-Inativo}${COLOR_RESET}"
+    local st_watchdog="${COLOR_RED}🔴  ${LANG_ST_INACTIVE:-Inativo}${COLOR_RESET}"
     if crontab -l 2>/dev/null | grep -q "WATCHDOG" || [ -d "/TcTI/SCRIPTS/WATCHDOG" ]; then
         if crontab -l 2>/dev/null | grep -q "WATCHDOG"; then
-            st_watchdog="${COLOR_GREEN}🟢 ${LANG_ST_ACTIVE_CRON:-Ativo (Cron)}${COLOR_RESET}"
+            st_watchdog="${COLOR_GREEN}🟢  ${LANG_ST_ACTIVE_CRON:-Ativo (Cron)}${COLOR_RESET}"
         else
-            st_watchdog="${COLOR_YELLOW}🟡 ${LANG_ST_CONFIGURED:-Configurado}${COLOR_RESET}"
+            st_watchdog="${COLOR_YELLOW}🟡  ${LANG_ST_CONFIGURED:-Configurado}${COLOR_RESET}"
         fi
     fi
 
     # 6. Bot Interativo Telegram
-    local st_tg_bot="${COLOR_RED}🔴 ${LANG_ST_INACTIVE:-Inativo}${COLOR_RESET}"
+    local st_tg_bot="${COLOR_RED}🔴  ${LANG_ST_INACTIVE:-Inativo}${COLOR_RESET}"
     if systemctl is-active pve-telegram-bot &>/dev/null; then
-        st_tg_bot="${COLOR_GREEN}🟢 ${LANG_ST_ACTIVE_RUN:-Ativo (Rodando)}${COLOR_RESET}"
+        st_tg_bot="${COLOR_GREEN}🟢  ${LANG_ST_ACTIVE_RUN:-Ativo (Rodando)}${COLOR_RESET}"
     elif [ -f "/TcTI/SCRIPTS/telegram/.env" ]; then
-        st_tg_bot="${COLOR_YELLOW}🟡 ${LANG_ST_CONF_STOPPED:-Configurado (Parado)}${COLOR_RESET}"
+        st_tg_bot="${COLOR_YELLOW}🟡  ${LANG_ST_CONF_STOPPED:-Configurado (Parado)}${COLOR_RESET}"
     fi
 
     # 7. Notificações Telegram
-    local st_tg_notif="${COLOR_RED}🔴 ${LANG_ST_UNCONFIGURED:-Não configurado}${COLOR_RESET}"
+    local st_tg_notif="${COLOR_RED}🔴  ${LANG_ST_UNCONFIGURED:-Não configurado}${COLOR_RESET}"
     if [ -f "/TcTI/SCRIPTS/telegram/.env_notificacoes" ]; then
         local NOTIF_SERVER_NAME=""
         source "/TcTI/SCRIPTS/telegram/.env_notificacoes" 2>/dev/null
-        st_tg_notif="${COLOR_GREEN}🟢 ${LANG_ST_CONFIGURED:-Configurado} (${NOTIF_SERVER_NAME:-OK})${COLOR_RESET}"
+        st_tg_notif="${COLOR_GREEN}🟢  ${LANG_ST_CONFIGURED:-Configurado} (${NOTIF_SERVER_NAME:-OK})${COLOR_RESET}"
     fi
 
     # 8. Atualização Automática do Script
-    local st_update="${COLOR_GREEN}🟢 ${LANG_ST_ENABLED_DEF:-Ativada (Padrão)}${COLOR_RESET}"
+    local st_update="${COLOR_GREEN}🟢  ${LANG_ST_ENABLED_DEF:-Ativada (Padrão)}${COLOR_RESET}"
     if [ -f "/TcTI/SCRIPTS/.no_auto_update" ] || [ -f "$SCRIPT_DIR/.no_auto_update" ]; then
-        st_update="${COLOR_RED}🔴 ${LANG_ST_DISABLED_FIX:-Desativada (Versão Fixa)}${COLOR_RESET}"
+        st_update="${COLOR_RED}🔴  ${LANG_ST_DISABLED_FIX:-Desativada (Versão Fixa)}${COLOR_RESET}"
     fi
 
     # 9. Assistente de IA (Resumido em 1 linha única)
-    local st_ia="${COLOR_RED}🔴 ${LANG_ST_UNCONFIGURED_F:-Não configurada}${COLOR_RESET}"
+    local st_ia="${COLOR_RED}🔴  ${LANG_ST_UNCONFIGURED_F:-Não configurada}${COLOR_RESET}"
     if [ -f "/root/.ai_config" ]; then
         local AI_PROVIDER="" AI_MODEL="" AI_KEY=""
         source /root/.ai_config 2>/dev/null
@@ -567,12 +573,12 @@ show_system_status() {
         esac
         local mod="${AI_MODEL:-custom}"
         if [ -n "$AI_KEY" ]; then
-            st_ia="${COLOR_GREEN}🟢 ${prov} (${mod}) | Key OK${COLOR_RESET}"
+            st_ia="${COLOR_GREEN}🟢  ${prov} (${mod}) | Key OK${COLOR_RESET}"
         else
-            st_ia="${COLOR_YELLOW}🟡 ${prov} (${mod}) | Sem Key${COLOR_RESET}"
+            st_ia="${COLOR_YELLOW}🟡  ${prov} (${mod}) | Sem Key${COLOR_RESET}"
         fi
     elif [ -f "/root/.openai_key" ]; then
-        st_ia="${COLOR_GREEN}🟢 OpenAI (gpt-4o-mini) | Key OK${COLOR_RESET}"
+        st_ia="${COLOR_GREEN}🟢  OpenAI (gpt-4o-mini) | Key OK${COLOR_RESET}"
     fi
 
     echo -e "  ${COLOR_CYAN}${COLOR_BOLD}📊  ${LANG_MAIN_ST_TITLE:-STATUS DOS SERVIÇOS E CONFIGURAÇÕES:}${COLOR_RESET}"
@@ -601,8 +607,8 @@ show_system_status() {
     print_status_line "💻" "${LANG_MAIN_ST_WEBUI:-Sensores WebUI (PVE)}" "$st_webui_sensors"
     print_status_line "🚀" "${LANG_MAIN_ST_AUTOSTART:-Auto-Start Shell}" "$st_autostart"
     print_status_line "🐕" "${LANG_MAIN_ST_WATCHDOG:-Watchdog de VMs}" "$st_watchdog"
-    print_status_line "🤖" "${LANG_MAIN_ST_TGBOT:-Bot Telegram (Inter)}" "$st_tg_bot"
-    print_status_line "📣" "${LANG_MAIN_ST_TGNOTIF:-Notificação Telegram}" "$st_tg_notif"
+    print_status_line "🤖" "${LANG_MAIN_ST_TG_BOT:-Bot Telegram (Inter)}" "$st_tg_bot"
+    print_status_line "📣" "${LANG_MAIN_ST_TG_NOTIF:-Notificação Telegram}" "$st_tg_notif"
     print_status_line "🔄" "${LANG_MAIN_ST_UPDATE:-Auto-Update Script}" "$st_update"
     print_status_line "🧙" "${LANG_MAIN_ST_IA:-Assistente de IA}" "$st_ia"
 
