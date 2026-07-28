@@ -21,6 +21,18 @@ FUNCTIONS_DIR="$SCRIPT_DIR/functions"
 # Timestamp para forçar bypass de cache (cache busting)
 CACHE_BUSTER="?t=$(date +%s%N)"
 
+# -----------------VARIAVEIS DE SISTEMA----------------------
+dnstesthost=google.com.br
+pve_log_folder="/var/log/pve/tasks/"
+proxmoxlib="/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js"
+distribution=$(. /etc/os-release 2>/dev/null; echo $VERSION_CODENAME)
+[ -z "$distribution" ] && distribution=$(grep -oP '(?<=VERSION_CODENAME=).*' /etc/os-release | tr -d '"' 2>/dev/null)
+[ -z "$distribution" ] && distribution="bookworm" # Fallback extremo
+execdir=$(dirname $0)
+hostname=$(hostname)
+date=$(date +%Y_%m_%d-%H_%M_%S)
+# ---------------FIM DAS VARIAVEIS DE SISTEMA-----------------
+
 # Lista de arquivos não é mais necessária pois usaremos o tar.gz
 # Cores modernas
 COLOR_RESET="\033[0m"
@@ -434,17 +446,6 @@ echo -e "${COLOR_GREEN}${SYMBOL_CHECK} ${extras_count} ${LANG_UPD_EXTRAS_LOADED:
 echo ""
 sleep 1
 
-# -----------------VARIAVEIS DE SISTEMA----------------------
-dnstesthost=google.com.br
-pve_log_folder="/var/log/pve/tasks/"
-proxmoxlib="/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js"
-distribution=$(. /etc/os-release 2>/dev/null; echo $VERSION_CODENAME)
-[ -z "$distribution" ] && distribution=$(grep -oP '(?<=VERSION_CODENAME=).*' /etc/os-release | tr -d '"' 2>/dev/null)
-[ -z "$distribution" ] && distribution="bookworm" # Fallback extremo
-execdir=$(dirname $0)
-hostname=$(hostname)
-date=$(date +%Y_%m_%d-%H_%M_%S)
-# ---------------FIM DAS VARIAVEIS DE SISTEMA-----------------
 
 # ============================================================
 # MOTOR GRÁFICO E MULTI-IDIOMA (i18n)
