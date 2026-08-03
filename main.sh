@@ -574,6 +574,11 @@ show_system_status() {
             *) prov="${AI_PROVIDER:-IA}" ;;
         esac
         local mod="${AI_MODEL:-custom}"
+        
+        if [ -n "$AI_ENC_KEY" ]; then
+            AI_KEY=$(echo "$AI_ENC_KEY" | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:"TCTI_PVE_2026" 2>/dev/null || echo "$AI_ENC_KEY" | base64 -d 2>/dev/null)
+        fi
+
         if [ -n "$AI_KEY" ]; then
             st_ia="${COLOR_GREEN}🟢  ${prov} (${mod}) | Key OK${COLOR_RESET}"
         else
